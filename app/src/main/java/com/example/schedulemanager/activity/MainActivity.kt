@@ -1,15 +1,22 @@
-package com.example.schedulemanager
+package com.example.schedulemanager.activity
 
 import android.accounts.AccountManager
 import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.viewpager2.widget.ViewPager2
+import com.example.schedulemanager.viewmodel.MyViewModel
+import com.example.schedulemanager.R
 import com.example.schedulemanager.databinding.ActivityMainBinding
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
@@ -18,6 +25,9 @@ import com.google.api.services.calendar.CalendarScopes
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
+    //TODO 카카오 위치검색, 구글지도 API 확인
+    //      데이터 추가시 NOTIFY 확인
+    //      알림 클릭시 액티비티로 이동 - CALENDARVIEW 참조
     companion object {
         const val REQUEST_CODE = 1000
         const val REQUEST_GOOGLE_PLAY_SERVICES = 1002
@@ -38,7 +48,47 @@ class MainActivity : AppCompatActivity() {
             this, Arrays.asList(CalendarScopes.CALENDAR)
         ).setBackOff(ExponentialBackOff())
 
+        viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
+        viewModel.setDBHelper(this)
+        viewModel.mainActivity = this
+        createNotificationChannel()
+        val myFragementStateAdapter = MyFragementStateAdapter(this)
+        binding.viewPager2.adapter = myFragementStateAdapter
+        myFragementStateAdapter.apply {
+            binding.viewPager2.setCurrentItem(this.FIRST_POSITION, false)
+        }
+        viewModel.setSelectToday()
+        binding.rvMainSchedule.adapter = schduleListAdapter
+        val calendar = Calendar.getInstance()
+        viewModel.setBottomList(
+            DateVO(
+                calendar.get(Calendar.YEAR).toString(),
+                (calendar.get(Calendar.MONTH) + 1).toString(),
+                calendar.get(Calendar.DATE).toString()
+            )
+        )
 
+        binding.viewPager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                viewModel.setDate(position)
+            }
+        })
+
+        //플로팅 액션버튼 클릭
+        binding.fabMainAddSchedule.setOnClickListener(View.OnClickListener {
+            val intent = Intent(
+                this,
+                AddScheduleActivity::class.java
+            )
+            startActivity(intent)
+        })
+
+        //리스트 클릭버튼
+        binding.ibMainAllList.setOnClickListener {
+            val intent = Intent(this, ScheduleListActivity::class.java)
+            startActivity(intent)
+        }
 
         binding.ibMainSync.setOnClickListener {
             ActivityCompat.requestPermissions(
@@ -48,6 +98,64 @@ class MainActivity : AppCompatActivity() {
                 ),
                 REQUEST_CODE
             )
+        }
+
+//        val db: SQLiteDatabase = viewModel.getDatabase(DataBaseType.READ)
+//        val cursor = db.rawQuery(
+//            "select * from calendar",
+//            null
+//        )
+//        while (cursor.moveToNext()) {
+//            Log.e(
+//                "in DB",
+//                cursor.getInt(0).toString() + "/" + cursor.getString(1)
+//                    .toString() + "/" + cursor.getString(2) +
+//                        "/" + cursor.getString(3) + "/" + cursor.getString(4) +
+//                        "/" + cursor.getString(5) + "/" + cursor.getString(6) +
+//                        "/" + cursor.getString(7) + "/" + cursor.getString(8)
+//            )
+//        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.setCalendarNotify()
+        viewModel.setBottomListNotify()
+    }
+
+    /**
+     * 상단의 날짜설정
+     */
+    fun setDate(datetime: String) {
+        binding.tvCalendarYearMonth.setText(datetime)
+    }
+
+    /**
+     * 하단의 날짜 설정
+     */
+    fun setSelectDay(selectDay: String) {
+        binding.tvMainSelectDay.text = selectDay
+    }
+
+    /**
+     * 하단의 리스트 데이터 세팅
+     */
+    fun setBottomList(scheduleList: ArrayList<ScheduleDataVO>) {
+        schduleListAdapter.scheduleList = scheduleList
+        schduleListAdapter.notifyDataSetChanged()
+    }
+
+    /**
+     * 알림채널 생성
+     */
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = getString(R.string.noti_name)
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(getString(R.string.noti_id), name, importance)
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
         }
     }
 

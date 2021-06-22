@@ -13,13 +13,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ScheduleManager"
         android:usesCleartextTraffic="true">
-        <activity android:name=".MainActivity">
+        <activity android:name=".activity.AddScheduleActivity"></activity>
+        <activity android:name=".activity.ScheduleListActivity"/>
+        <activity android:name=".activity.MainActivity">
+        <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver android:name=".receiver.MyBroadCastReceiver"/>
+
     </application>
 
 </manifest>
