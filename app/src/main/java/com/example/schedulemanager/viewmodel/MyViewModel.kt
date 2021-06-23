@@ -260,7 +260,8 @@ class MyViewModel : ViewModel() {
     fun requestPlaceData(context: Context, query: String, placeAdapter: PlaceAdapter) {
         val queue = Volley.newRequestQueue(context)
         val map = HashMap<String, String>()
-        map.put("Authorization",
+        map.put(
+            "Authorization",
             API_KEY
         )
         var page = 1
@@ -333,7 +334,6 @@ class MyViewModel : ViewModel() {
     fun addSchedule(
         context: Context,
         title: String,
-        date: String,
         time: String,
         place: String,
         placeX: String,
@@ -343,6 +343,12 @@ class MyViewModel : ViewModel() {
         selectCal: java.util.Calendar
     ) {
         setDBHelper(context)
+
+        val date = getDate(
+            selectCal.get(Calendar.YEAR).toString(),
+            (selectCal.get(Calendar.MONTH) + 1).toString(),
+            selectCal.get(Calendar.DATE).toString()
+        )
         var sql =
             "insert into calendar(title,date,time,place,placeX,placeY,contents,alarmTime) values('" +
                     title + "','" +
@@ -367,12 +373,12 @@ class MyViewModel : ViewModel() {
                     selectCal.get(java.util.Calendar.MINUTE) - alarmTime.toInt()
                 )
             }
-            val year = date.split(".")[0]
-            val month = date.split(".")[1]
-            val day = date.split(".")[2]
+            val year = date.split("-")[0]
+            val month = date.split("-")[1].toInt()
+            val day = date.split("-")[2].toInt()
             val hour = time.split(":")[0]
             val min = time.split(":")[1]
-            val alarmCode = year.substring(2, 4) + month + day + hour + min
+            val alarmCode = year.substring(2, 4) + month.toString() + day.toString() + hour + min
             Log.e("aCode", alarmCode)
             Log.e("selCal", selectCal.time.toString())
             createAlarm(
@@ -388,21 +394,42 @@ class MyViewModel : ViewModel() {
     }
 
     /**
+     * 날짜 변환 = 2021 9 21  -> 2021-09-21
+     */
+    fun getDate(year: String, month: String, day: String): String {
+        var m = ""
+        var d = ""
+        if (month.length == 1) {
+            m = "0$month"
+        } else {
+            m = month
+        }
+        if (day.length == 1) {
+            d = "0$day"
+        } else {
+            d = day
+        }
+        return "$year-$m-$d"
+    }
+
+    /**
      * MainActivity - 하단 데이터 리스트 세팅
      */
     fun setBottomList(dateVO: DateVO) {
         val schduleList = arrayListOf<ScheduleDataVO>()
-        val date = dateVO.year + "." + dateVO.month + "." + dateVO.day
+        val date = getDate(dateVO.year, dateVO.month, dateVO.day)
         val sql =
-            "select title,date,time,place from calendar where date='$date' order by time+0 asc"
+            "select id,title,date,time,place from calendar where date='$date' order by TIME(time) asc"
         val cursor = DBManager.select(sql, this)
+
         while (cursor.moveToNext()) {
             schduleList.add(
                 ScheduleDataVO(
-                    title = cursor.getString(0),
-                    date = cursor.getString(1),
-                    time = cursor.getString(2),
-                    place = cursor.getString(3)
+                    id=cursor.getInt(0),
+                    title = cursor.getString(1),
+                    date = cursor.getString(2),
+                    time = cursor.getString(3),
+                    place = cursor.getString(4)
                 )
             )
         }
@@ -424,7 +451,6 @@ class MyViewModel : ViewModel() {
     fun update(
         context: Context,
         title: String,
-        date: String,
         time: String,
         place: String,
         x: String,
@@ -434,6 +460,11 @@ class MyViewModel : ViewModel() {
         selectCal: java.util.Calendar,
         oldId: Int
     ) {
+        val date = getDate(
+            selectCal.get(Calendar.YEAR).toString(),
+            (selectCal.get(Calendar.MONTH) + 1).toString(),
+            selectCal.get(Calendar.DATE).toString()
+        )
         val sql = "update calendar set title='" + title + "', date='" + date + "', " +
                 "time= '" + time + "', place='" + place + "', placeX='" + x + "', placeY='" + y + "', " +
                 "contents='" + contents + "', alarmTime='" + alarmTime + "' where id=" + oldId
@@ -537,20 +568,33 @@ class MyViewModel : ViewModel() {
      */
     fun setScheduleList(schduleListAdapter: SchduleListAdapter) {
         val scheduleList = arrayListOf<ScheduleDataVO>()
-        val sql = "select * from calendar order by date+0,time+0 asc"
+        val sql = "select * from calendar order by DATE(date) asc"
         val cursor = DBManager.select(sql, this)
 
         while (cursor.moveToNext()) {
-            val hour = cursor.getString(3).split(":")[0]
-            val min = cursor.getString(3).split(":")[1]
-            getFilterSelectTime(hour.toInt(), min.toInt())
-            val scheduleDataVO = ScheduleDataVO(
-                title = cursor.getString(1),
-                date = cursor.getString(2),
-                time = getFilterSelectTime(hour.toInt(), min.toInt()),
-                place = cursor.getString(4),
-                viewType = 2
-            )
+            val scheduleDataVO: ScheduleDataVO
+            if (cursor.getString(3).equals("종일")) {
+                scheduleDataVO = ScheduleDataVO(
+                    id=cursor.getInt(0),
+                    title = cursor.getString(1),
+                    date = cursor.getString(2),
+                    time = cursor.getString(3),
+                    place = cursor.getString(4),
+                    viewType = 2
+                )
+            } else {
+                val hour = cursor.getString(3).split(":")[0]
+                val min = cursor.getString(3).split(":")[1]
+                getFilterSelectTime(hour.toInt(), min.toInt())
+                scheduleDataVO = ScheduleDataVO(
+                    id=cursor.getInt(0),
+                    title = cursor.getString(1),
+                    date = cursor.getString(2),
+                    time = getFilterSelectTime(hour.toInt(), min.toInt()),
+                    place = cursor.getString(4),
+                    viewType = 2
+                )
+            }
             scheduleList.add(scheduleDataVO)
         }
         schduleListAdapter.scheduleList = scheduleList
@@ -594,7 +638,7 @@ class MyViewModel : ViewModel() {
      * 데이터 요청 클래스 EXCUTE
      */
     fun requestCalendarData(mCredential: GoogleAccountCredential) {
-        RequestTask(mCredential,this).execute()
+        RequestTask(mCredential, this).execute()
     }
 
 }

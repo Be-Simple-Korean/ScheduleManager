@@ -60,18 +60,19 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
         isUpdate = intent.getBooleanExtra("isUpdate", false)
         Log.e("isUp", isUpdate.toString())
         if (isUpdate) {
-            val date = intent.getStringExtra("date").toString()
-            val sql = "select id from calendar where date='$date'"
+            val id = intent.getIntExtra("id",-1)
+            if(id==-1){
+                finish()
+            }
+//            val date = intent.getStringExtra("date").toString()
+            val sql = "select id from calendar where id=$id"
             Log.e("sql", sql)
-            val position = intent.getIntExtra("position", 0)
-            Log.e("position", "$position")
+//            val position = intent.getIntExtra("position", 0)
+//            Log.e("position", "$position")
             val cursor = DBManager.select(sql, viewModel)
             Log.e("cc", "${cursor.count}")
-            while (cursor.moveToNext()) {
-                if (position == cursor.position) {
-                    oldId = cursor.getInt(0)
-                    break
-                }
+            if(cursor.count>0){
+                oldId=id
             }
             if (oldId != -1) {
                 val sql = "select * from calendar where id=" + oldId
@@ -80,23 +81,26 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
                     binding.editScheduleAddTitle.setText(cursor.getString(1))
                     val date = cursor.getString(2)
                     selectCal.set(
-                        date.split(".")[0].toInt(),
-                        date.split(".")[1].toInt() - 1,
-                        date.split(".")[2].toInt()
+                        date.split("-")[0].toInt(),
+                        date.split("-")[1].toInt() - 1,
+                        date.split("-")[2].toInt()
                     )
                     Log.e("set cal", selectCal.time.toString())
-//                    year = date.split(".")[0].toInt()
-//                    month = date.split(".")[1].toInt()
-//                    day = date.split(".")[2].toInt()
                     binding.tvScheduleSelectedDate.text = cursor.getString(2)
                     if (cursor.getString(3).equals("종일")) {
                         binding.tvScheduleSelectedTime.text = cursor.getString(3)
                         hour = -1
                         min = -1
+                        selectCal.set(Calendar.HOUR_OF_DAY,0)
+                        selectCal.set(Calendar.MINUTE,0)
+                        selectCal.set(Calendar.SECOND,0)
                     } else {
                         val time = cursor.getString(3)
                         hour = time.split(":")[0].toInt()
                         min = time.split(":")[1].toInt()
+                        selectCal.set(Calendar.HOUR_OF_DAY,hour)
+                        selectCal.set(Calendar.MINUTE,min)
+                        selectCal.set(Calendar.SECOND,0)
                         binding.tvScheduleSelectedTime.text = viewModel.getFilterSelectTime(
                             time.split(":")[0].toInt(),
                             time.split(":")[1].toInt()
@@ -118,9 +122,19 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
                     binding.etScheduleAddContents.setText(cursor.getString(7))
                     if (cursor.getString(8).trim().isNotEmpty()) {
                         alarmTime = cursor.getString(8)
-                        binding.tvScheduleSelectedAlarmTime.text = (cursor.getString(8) + " 분 전")
+                        if(alarmTime.equals("0")){
+                            binding.tvScheduleSelectedAlarmTime.text = "일정 시작 시간"
+                        }else{
+                            binding.tvScheduleSelectedAlarmTime.text = (cursor.getString(8) + " 분 전")
+                        }
+
                     }
                     binding.llDelete.visibility = View.VISIBLE
+                    var curDateTime = Calendar.getInstance()
+                    curDateTime.set(Calendar.SECOND, 0)
+                    if(selectCal.before(curDateTime)){
+                        binding.ibScheduleCheck.visibility=View.GONE
+                    }
                 }
             }
         } else {
@@ -220,10 +234,6 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
                 viewModel.update(
                     this,
                     title,
-                    selectCal.get(Calendar.YEAR)
-                        .toString() + "." + (selectCal.get(Calendar.MONTH) + 1) + "." + selectCal.get(
-                        Calendar.DATE
-                    ),
                     hour.toString() + ":" + min.toString(),
                     place,
                     selectDoucments.y,
@@ -234,20 +244,9 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
                 )
                 finish()
             } else {
-                Log.e(
-                    "date",
-                    selectCal.get(Calendar.YEAR)
-                        .toString() + "." + selectCal.get(Calendar.MONTH) + "." + selectCal.get(
-                        Calendar.DATE
-                    )
-                )
                 viewModel.addSchedule(
                     this,
                     title,
-                    selectCal.get(Calendar.YEAR)
-                        .toString() + "." + (selectCal.get(Calendar.MONTH) + 1) + "." + selectCal.get(
-                        Calendar.DATE
-                    ),
                     hour.toString() + ":" + min.toString(),
                     place,
                     selectDoucments.y,

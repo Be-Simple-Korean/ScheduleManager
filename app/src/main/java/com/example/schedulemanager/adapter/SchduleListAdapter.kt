@@ -59,7 +59,8 @@ class SchduleListAdapter : RecyclerView.Adapter<SchduleListAdapter.ItemViewHolde
             intent.putExtra("isUpdate", true)
             Log.e("send date", scheduleList.get(position).date)
             intent.putExtra("date", scheduleList.get(position).date)
-            intent.putExtra("position", position)
+            intent.putExtra("id",scheduleList.get(position).id)
+
             it.context.startActivity(intent)
 
         }

@@ -1,6 +1,7 @@
 package com.example.schedulemanager.adapter
 
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -77,8 +78,12 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
         })
 
         if (::viewModel.isInitialized) {
-            val date =
-                dayList.get(position).year + "." + dayList.get(position).month + "." + dayList.get(position).day
+            val year=dayList.get(position).year
+            var month= dayList.get(position).month
+            if(month.length==1) month= "0$month"
+            var day= dayList.get(position).day
+            if(day.length==1) day= "0$day"
+            val date ="${year}-${month}-${day}"
             val sql = "select * from calendar where date = '$date'"
             val cursor = DBManager.select(sql, viewModel)
 

@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity() {
 
         val db: SQLiteDatabase = viewModel.getDatabase(DataBaseType.READ)
         val cursor = db.rawQuery(
-            "select * from calendar",
+            "select * from calendar ",
             null
         )
         while (cursor.moveToNext()) {

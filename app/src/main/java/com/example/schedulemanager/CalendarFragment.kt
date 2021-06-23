@@ -44,7 +44,7 @@ class CalendarFragment : Fragment() {
 
     val onClickListener=object : OnClickListener {
         override fun onCalendarItemClickListener(dateVO: DateVO, week: String) {
-            val selectDay = "${dateVO.day} $week"
+            val selectDay = "${dateVO.day}. $week"
             viewModel.setSelectDay(selectDay)
             viewModel.setBottomList(dateVO)
         }
