@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.net.ConnectivityManager
 import android.os.Build
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
@@ -30,6 +31,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * 데이터베이스 반환 타입
@@ -41,15 +43,9 @@ enum class DataBaseType {
 class MyViewModel : ViewModel() {
 
     companion object {
-        private const val TAG = "MyViewModel"
-        const val SHOW_TOAST = 1
-        const val UPDATE_SERVICE = 2
-        const val CHOOSE_ACCOUNT = 3
-        const val GET_DATE = 4
         const val API_KEY = "KakaoAK 745896bb9c87ca7a3b0ff8976fe1e747"
         const val BASE_API_URL = "https://dapi.kakao.com/v2/local/search/keyword.json?"
         const val FIRST_VALUE_ADDRESS = "사용자 지정위치"
-        const val REQUEST_GOOGLE_PLAY_SERVICES = 1002
 
         /**
          * 한번에 가져올수있는 문서의 최대 개수
@@ -67,6 +63,14 @@ class MyViewModel : ViewModel() {
     lateinit var calendarAdapter: CalendarAdapter
     lateinit var curSelectDateVO: DateVO
     lateinit var dbHelper: DBHelper
+
+    //상단의 타이틀
+    var yearMonth = MutableLiveData<String>()
+    //하단-상단-타이틀
+    var dayWeeks= MutableLiveData<String>()
+    //하단 리스트
+    var mainSchduleList=MutableLiveData<ArrayList<ScheduleDataVO>>()
+    var subSchduleList= arrayListOf<ScheduleDataVO>()
 
     /**
      * 달력 notify 처리
@@ -96,7 +100,7 @@ class MyViewModel : ViewModel() {
         }
         setCurrentDate(date)
         var datetime = SimpleDateFormat("yyyy년 M월", Locale.KOREA).format(date.time)
-        mainActivity.setDate(datetime)
+        yearMonth.value = datetime
     }
 
     /**
@@ -160,8 +164,10 @@ class MyViewModel : ViewModel() {
     /**
      * 하단의 날짜 설정
      */
-    fun setSelectDay(selectDay: String) {
-        mainActivity.setSelectDay(selectDay)
+    fun setSelectDay(dateVO: DateVO, week: String) {
+        val selectDay = "${dateVO.day}. $week"
+        dayWeeks.value=selectDay
+//        mainActivity.setSelectDay(selectDay)
     }
 
     /**
@@ -185,7 +191,7 @@ class MyViewModel : ViewModel() {
             calendar.get(java.util.Calendar.DATE).toString()
         )
 
-        mainActivity.setSelectDay(date)
+        dayWeeks.value=date
     }
 
     /**
@@ -197,31 +203,6 @@ class MyViewModel : ViewModel() {
         } else {
             return dbHelper.readableDatabase
         }
-    }
-
-    /**
-     * 시간 구하기
-     *
-     * ex) 오후 09:30 -> 21
-     */
-    fun getHour(time: String): String {
-        var timeFormat = time.split(" ")
-        var hour = timeFormat[1].split(":")[0]
-        if (timeFormat.contains("오후")) {
-            hour = (hour.toInt() + 12).toString()
-        }
-        return hour
-    }
-
-    /**
-     * 분 구하기
-     *
-     * ex) 오후 09:30 -> 30
-     */
-    fun getMin(time: String): String {
-        var timeFormat = time.split(" ")
-        var min = timeFormat[1].split(":")[1]
-        return min
     }
 
     /**
@@ -416,16 +397,16 @@ class MyViewModel : ViewModel() {
      * MainActivity - 하단 데이터 리스트 세팅
      */
     fun setBottomList(dateVO: DateVO) {
-        val schduleList = arrayListOf<ScheduleDataVO>()
+        subSchduleList.clear()
         val date = getDate(dateVO.year, dateVO.month, dateVO.day)
         val sql =
             "select id,title,date,time,place from calendar where date='$date' order by TIME(time) asc"
         val cursor = DBManager.select(sql, this)
 
         while (cursor.moveToNext()) {
-            schduleList.add(
+            subSchduleList.add(
                 ScheduleDataVO(
-                    id=cursor.getInt(0),
+                    id = cursor.getInt(0),
                     title = cursor.getString(1),
                     date = cursor.getString(2),
                     time = cursor.getString(3),
@@ -433,7 +414,9 @@ class MyViewModel : ViewModel() {
                 )
             )
         }
-        mainActivity.setBottomList(schduleList)
+        mainSchduleList.postValue(subSchduleList)
+
+//        mainActivity.setBottomList(schduleList)
     }
 
     /**
@@ -575,7 +558,7 @@ class MyViewModel : ViewModel() {
             val scheduleDataVO: ScheduleDataVO
             if (cursor.getString(3).equals("종일")) {
                 scheduleDataVO = ScheduleDataVO(
-                    id=cursor.getInt(0),
+                    id = cursor.getInt(0),
                     title = cursor.getString(1),
                     date = cursor.getString(2),
                     time = cursor.getString(3),
@@ -587,7 +570,7 @@ class MyViewModel : ViewModel() {
                 val min = cursor.getString(3).split(":")[1]
                 getFilterSelectTime(hour.toInt(), min.toInt())
                 scheduleDataVO = ScheduleDataVO(
-                    id=cursor.getInt(0),
+                    id = cursor.getInt(0),
                     title = cursor.getString(1),
                     date = cursor.getString(2),
                     time = getFilterSelectTime(hour.toInt(), min.toInt()),

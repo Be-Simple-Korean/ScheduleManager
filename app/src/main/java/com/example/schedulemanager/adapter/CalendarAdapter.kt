@@ -1,10 +1,12 @@
 package com.example.schedulemanager.adapter
 
 import android.graphics.Color
+import android.graphics.Typeface
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schedulemanager.R
 import com.example.schedulemanager.adapter.PlaceAdapter.Companion.NO_DATA
@@ -28,9 +30,13 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
     lateinit var viewModel: MyViewModel
     var dayList = arrayListOf<DateVO>()
     var curShowMonth = 0
-
-    inner class CalendarItemViewHolder(val binding: ItemCalendarBinding) :
-        RecyclerView.ViewHolder(binding.root) {}
+    var layoutList = arrayListOf<LinearLayout>()
+    inner class CalendarItemViewHolder(val binding: ItemCalendarBinding) : RecyclerView.ViewHolder(binding.root) {
+            init {
+                layoutList.add(binding.ll)
+                Log.e("size",layoutList.size.toString())
+            }
+    }
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -53,15 +59,24 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
             else -> itemViewHolder.binding.tvCalendarDate.setTextColor(Color.BLACK)
         }
 
+
         if (!curShowMonth.toString().equals(dayList.get(position).month)) {
             itemViewHolder.binding.tvCalendarDate.alpha = 0.3f
         } else {
             itemViewHolder.binding.tvCalendarDate.alpha = 1f
-            if (dayList.get(position).day.toInt() == Calendar.getInstance().get(Calendar.DATE)) {
-                itemViewHolder.binding.llCalendarToday.setBackgroundResource(R.drawable.shape_calendar_today)
+        }
+        val calendar=Calendar.getInstance()
+        if(dayList.get(position).year.toInt()==calendar.get(Calendar.YEAR)){
+            if(dayList.get(position).month.toInt()==(calendar.get(Calendar.MONTH)+1)){
+                if(dayList.get(position).day.toInt()==calendar.get(Calendar.DATE)){
+                    itemViewHolder.binding.ll.setBackgroundResource(R.drawable.shape_calendar_tod)
+                    itemViewHolder.binding.tvCalendarDate.setTextColor(Color.WHITE)
+                    itemViewHolder.binding.tvCalendarDate.setTypeface(Typeface.DEFAULT_BOLD)
+                }
             }
         }
         itemViewHolder.itemView.setOnClickListener(View.OnClickListener {
+
             viewModel.curSelectDateVO=dayList.get(position)
             onClickListener.onCalendarItemClickListener(
                 dayList.get(position),

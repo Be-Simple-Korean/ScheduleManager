@@ -32,8 +32,7 @@ import com.google.api.services.calendar.CalendarScopes
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
-    //      데이터 추가시 NOTIFY 확인
-    //      알림 클릭시 액티비티로 이동 - CALENDARVIEW 참조p[
+    // TODO 달력 아이템 셀렉터 적용 - layoutList활용해서 클릭시 반복문으로 설정
     companion object {
         const val REQUEST_CODE = 1000
         const val REQUEST_GOOGLE_PLAY_SERVICES = 1002
@@ -44,7 +43,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var viewModel: MyViewModel
     lateinit var mCredential: GoogleAccountCredential
     val schduleListAdapter = SchduleListAdapter()
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -98,6 +97,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        //동기화 이미지버튼 클릭
         binding.ibMainSync.setOnClickListener {
             ActivityCompat.requestPermissions(
                 this,
@@ -108,49 +108,41 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        val db: SQLiteDatabase = viewModel.getDatabase(DataBaseType.READ)
-        val cursor = db.rawQuery(
-            "select * from calendar ",
-            null
-        )
-        while (cursor.moveToNext()) {
-            Log.e(
-                "in DB",
-                cursor.getInt(0).toString() + "/" + cursor.getString(1)
-                    .toString() + "/" + cursor.getString(2) +
-                        "/" + cursor.getString(3) + "/" + cursor.getString(4) +
-                        "/" + cursor.getString(5) + "/" + cursor.getString(6) +
-                        "/" + cursor.getString(7) + "/" + cursor.getString(8)
-            )
-        }
+        //상단 년월 데이터
+        viewModel.yearMonth.observe(this, androidx.lifecycle.Observer {
+            binding.tvCalendarYearMonth.text=it
+        })
+
+        //하단-상단-요일데이터
+        viewModel.dayWeeks.observe(this, androidx.lifecycle.Observer {
+            binding.tvMainSelectDay.text=it
+        })
+
+        viewModel.mainSchduleList.observe(this, androidx.lifecycle.Observer {
+            schduleListAdapter.scheduleList = it
+            schduleListAdapter.notifyDataSetChanged()
+        })
+//        val db: SQLiteDatabase = viewModel.getDatabase(DataBaseType.READ)
+//        val cursor = db.rawQuery(
+//            "select * from calendar ",
+//            null
+//        )
+//        while (cursor.moveToNext()) {
+//            Log.e(
+//                "in DB",
+//                cursor.getInt(0).toString() + "/" + cursor.getString(1)
+//                    .toString() + "/" + cursor.getString(2) +
+//                        "/" + cursor.getString(3) + "/" + cursor.getString(4) +
+//                        "/" + cursor.getString(5) + "/" + cursor.getString(6) +
+//                        "/" + cursor.getString(7) + "/" + cursor.getString(8)
+//            )
+//        }
     }
 
     override fun onResume() {
         super.onResume()
         viewModel.setCalendarNotify()
         viewModel.setBottomListNotify()
-    }
-
-    /**
-     * 상단의 날짜설정
-     */
-    fun setDate(datetime: String) {
-        binding.tvCalendarYearMonth.setText(datetime)
-    }
-
-    /**
-     * 하단의 날짜 설정
-     */
-    fun setSelectDay(selectDay: String) {
-        binding.tvMainSelectDay.text = selectDay
-    }
-
-    /**
-     * 하단의 리스트 데이터 세팅
-     */
-    fun setBottomList(scheduleList: ArrayList<ScheduleDataVO>) {
-        schduleListAdapter.scheduleList = scheduleList
-        schduleListAdapter.notifyDataSetChanged()
     }
 
     /**

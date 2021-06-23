@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.schedulemanager.adapter.CalendarAdapter
 import com.example.schedulemanager.data.DateVO
@@ -39,13 +40,15 @@ class CalendarFragment : Fragment() {
         viewModel.calendarAdapter=calendarAdapter
         calendarAdapter.notifyDataSetChanged()
         viewModel.setDate(pageIndex)
+
+
+
         return binding.root
     }
 
     val onClickListener=object : OnClickListener {
         override fun onCalendarItemClickListener(dateVO: DateVO, week: String) {
-            val selectDay = "${dateVO.day}. $week"
-            viewModel.setSelectDay(selectDay)
+            viewModel.setSelectDay(dateVO,week)
             viewModel.setBottomList(dateVO)
         }
 
