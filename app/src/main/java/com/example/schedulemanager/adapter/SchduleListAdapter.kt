@@ -5,10 +5,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.calendarapp.activity.AddScheduleActivity
-import com.example.calendarapp.databinding.ItemScheduleBinding
-import com.example.calendarapp.lisetener.OnClickListener
-import com.example.skotiln.data.ScheduleDataVO
+import com.example.schedulemanager.activity.AddScheduleActivity
+import com.example.schedulemanager.data.ScheduleDataVO
+import com.example.schedulemanager.databinding.ItemScheduleBinding
+import com.example.schedulemanager.lisetener.OnClickListener
 
 class SchduleListAdapter : RecyclerView.Adapter<SchduleListAdapter.ItemViewHolder>() {
 

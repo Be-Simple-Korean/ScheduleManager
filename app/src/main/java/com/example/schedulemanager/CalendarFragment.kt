@@ -7,14 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import com.example.calendarapp.adapter.CalendarAdapter
-import com.example.calendarapp.databinding.FragmentCalendarBinding
-import com.example.calendarapp.lisetener.OnClickListener
-import com.example.calendarapp.viewmodel.MyViewModel
-import com.example.calendarapp.DocumentsVO
-import com.example.calendarapp.data.DateVO
+import com.example.schedulemanager.adapter.CalendarAdapter
+import com.example.schedulemanager.data.DateVO
+import com.example.schedulemanager.data.location.DocumentsVO
+import com.example.schedulemanager.databinding.FragmentCalendarBinding
+import com.example.schedulemanager.lisetener.OnClickListener
 import com.example.schedulemanager.viewmodel.MyViewModel
-
 
 class CalendarFragment : Fragment() {
 
@@ -34,7 +32,7 @@ class CalendarFragment : Fragment() {
     ): View? {
         Log.e("수행","!!")
         binding= FragmentCalendarBinding.bind(inflater.inflate(R.layout.fragment_calendar, container, false))
-        val calendarAdapter=CalendarAdapter()
+        val calendarAdapter= CalendarAdapter()
         calendarAdapter.onClickListener=onClickListener
         calendarAdapter.viewModel=viewModel
         binding.rvCalendar.adapter=calendarAdapter
@@ -44,7 +42,7 @@ class CalendarFragment : Fragment() {
         return binding.root
     }
 
-    val onClickListener=object :OnClickListener{
+    val onClickListener=object : OnClickListener {
         override fun onCalendarItemClickListener(dateVO: DateVO, week: String) {
             val selectDay = "${dateVO.day} $week"
             viewModel.setSelectDay(selectDay)

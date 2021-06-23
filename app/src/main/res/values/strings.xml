@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ScheduleManager</string>
+    <string name="noti_name">Notification Channel</string>
+    <string name="noti_id">id</string>
 </resources>

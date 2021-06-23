@@ -3,7 +3,7 @@ package com.example.schedulemanager.adapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.example.calendarapp.CalendarFragment
+import com.example.schedulemanager.CalendarFragment
 
 class MyFragementStateAdapter(fragmentActivity: FragmentActivity) :
     FragmentStateAdapter(fragmentActivity) {
@@ -17,7 +17,7 @@ class MyFragementStateAdapter(fragmentActivity: FragmentActivity) :
     }
 
     override fun createFragment(position: Int): Fragment {
-            val calendarFragment=CalendarFragment()
+            val calendarFragment= CalendarFragment()
             calendarFragment.pageIndex=position
             return calendarFragment
     }

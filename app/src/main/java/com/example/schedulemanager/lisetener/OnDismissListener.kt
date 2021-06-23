@@ -1,9 +1,10 @@
 package com.example.schedulemanager.lisetener
 
-import com.example.calendarapp.DocumentsVO
-import com.example.calendarapp.dialog.DeleteGuideDialog
-import com.example.calendarapp.dialog.SearchPlaceDialog
-import com.example.calendarapp.dialog.SetAlarmDialog
+import com.example.schedulemanager.data.location.DocumentsVO
+import com.example.schedulemanager.dialog.DeleteGuideDialog
+import com.example.schedulemanager.dialog.SearchPlaceDialog
+import com.example.schedulemanager.dialog.SetAlarmDialog
+
 
 /**
  * 다이얼로그 닫은후의 변경리스너

@@ -6,10 +6,10 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.WindowManager
-import com.example.calendarapp.databinding.DialogDeleteGuideBinding
-import com.example.calendarapp.lisetener.OnDismissListener
-import com.example.calendarapp.viewmodel.MyViewModel
-import com.example.calendarview.database.DBManager
+import com.example.schedulemanager.database.DBManager
+import com.example.schedulemanager.databinding.DialogDeleteGuideBinding
+import com.example.schedulemanager.lisetener.OnDismissListener
+import com.example.schedulemanager.viewmodel.MyViewModel
 
 class DeleteGuideDialog(context: Context, val id: Int, val viewModel: MyViewModel) :
     Dialog(context) {

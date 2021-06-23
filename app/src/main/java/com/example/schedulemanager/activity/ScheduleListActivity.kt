@@ -3,9 +3,8 @@ package com.example.schedulemanager.activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
-import com.example.calendarapp.adapter.SchduleListAdapter
-import com.example.calendarapp.databinding.ActivityScheduleListBinding
-import com.example.calendarapp.viewmodel.MyViewModel
+import com.example.schedulemanager.adapter.SchduleListAdapter
+import com.example.schedulemanager.databinding.ActivityScheduleListBinding
 import com.example.schedulemanager.viewmodel.MyViewModel
 
 

@@ -1,13 +1,12 @@
 package com.example.schedulemanager.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.calendarapp.databinding.ItemSearchPlaceBinding
-import com.example.calendarapp.lisetener.OnClickListener
-import com.example.calendarapp.DocumentsVO
+import com.example.schedulemanager.data.location.DocumentsVO
+import com.example.schedulemanager.databinding.ItemSearchPlaceBinding
+import com.example.schedulemanager.lisetener.OnClickListener
 
 
 /**

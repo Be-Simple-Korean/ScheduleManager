@@ -3,8 +3,8 @@ package com.example.schedulemanager.database
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
-import com.example.calendarapp.viewmodel.DataBaseType
-import com.example.calendarapp.viewmodel.MyViewModel
+import com.example.schedulemanager.viewmodel.DataBaseType
+import com.example.schedulemanager.viewmodel.MyViewModel
 
 /**
  * DataBase CRUD 처리 클래스

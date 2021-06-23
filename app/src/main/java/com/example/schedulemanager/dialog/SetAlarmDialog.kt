@@ -9,8 +9,8 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
-import com.example.calendarapp.databinding.DialogInputAlarmTimeBinding
-import com.example.calendarapp.lisetener.OnDismissListener
+import com.example.schedulemanager.databinding.DialogInputAlarmTimeBinding
+import com.example.schedulemanager.lisetener.OnDismissListener
 
 /**
  * 알람 설정 다이얼로그

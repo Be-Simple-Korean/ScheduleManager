@@ -10,14 +10,14 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.calendarapp.adapter.PlaceAdapter
-import com.example.calendarapp.databinding.DialogSearchPlaceBinding
-import com.example.calendarapp.lisetener.OnClickListener
-import com.example.calendarapp.lisetener.OnDismissListener
-import com.example.calendarapp.viewmodel.MyViewModel
-import com.example.calendarapp.DocumentsVO
-import com.example.calendarapp.data.DateVO
-import com.example.skotiln.data.ScheduleDataVO
+import com.example.schedulemanager.adapter.PlaceAdapter
+import com.example.schedulemanager.data.DateVO
+import com.example.schedulemanager.data.location.DocumentsVO
+import com.example.schedulemanager.databinding.DialogSearchPlaceBinding
+import com.example.schedulemanager.lisetener.OnClickListener
+import com.example.schedulemanager.lisetener.OnDismissListener
+import com.example.schedulemanager.viewmodel.MyViewModel
+
 
 
 class SearchPlaceDialog(context: Context,val viewModel: MyViewModel) : Dialog(context) {

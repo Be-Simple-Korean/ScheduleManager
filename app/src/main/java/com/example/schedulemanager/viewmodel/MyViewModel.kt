@@ -594,7 +594,7 @@ class MyViewModel : ViewModel() {
      * 데이터 요청 클래스 EXCUTE
      */
     fun requestCalendarData(mCredential: GoogleAccountCredential) {
-        RequestTask(mCredential).execute()
+        RequestTask(mCredential,this).execute()
     }
 
 }

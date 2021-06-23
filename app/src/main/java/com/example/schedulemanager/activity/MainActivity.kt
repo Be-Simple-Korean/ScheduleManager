@@ -7,8 +7,10 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.sqlite.SQLiteDatabase
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +19,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.example.schedulemanager.viewmodel.MyViewModel
 import com.example.schedulemanager.R
+import com.example.schedulemanager.adapter.MyFragementStateAdapter
+import com.example.schedulemanager.adapter.SchduleListAdapter
+import com.example.schedulemanager.data.DateVO
+import com.example.schedulemanager.data.ScheduleDataVO
 import com.example.schedulemanager.databinding.ActivityMainBinding
+import com.example.schedulemanager.viewmodel.DataBaseType
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.util.ExponentialBackOff
@@ -25,9 +32,8 @@ import com.google.api.services.calendar.CalendarScopes
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
-    //TODO 카카오 위치검색, 구글지도 API 확인
     //      데이터 추가시 NOTIFY 확인
-    //      알림 클릭시 액티비티로 이동 - CALENDARVIEW 참조
+    //      알림 클릭시 액티비티로 이동 - CALENDARVIEW 참조p[
     companion object {
         const val REQUEST_CODE = 1000
         const val REQUEST_GOOGLE_PLAY_SERVICES = 1002
@@ -37,6 +43,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
     lateinit var viewModel: MyViewModel
     lateinit var mCredential: GoogleAccountCredential
+    val schduleListAdapter = SchduleListAdapter()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -100,21 +108,21 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-//        val db: SQLiteDatabase = viewModel.getDatabase(DataBaseType.READ)
-//        val cursor = db.rawQuery(
-//            "select * from calendar",
-//            null
-//        )
-//        while (cursor.moveToNext()) {
-//            Log.e(
-//                "in DB",
-//                cursor.getInt(0).toString() + "/" + cursor.getString(1)
-//                    .toString() + "/" + cursor.getString(2) +
-//                        "/" + cursor.getString(3) + "/" + cursor.getString(4) +
-//                        "/" + cursor.getString(5) + "/" + cursor.getString(6) +
-//                        "/" + cursor.getString(7) + "/" + cursor.getString(8)
-//            )
-//        }
+        val db: SQLiteDatabase = viewModel.getDatabase(DataBaseType.READ)
+        val cursor = db.rawQuery(
+            "select * from calendar",
+            null
+        )
+        while (cursor.moveToNext()) {
+            Log.e(
+                "in DB",
+                cursor.getInt(0).toString() + "/" + cursor.getString(1)
+                    .toString() + "/" + cursor.getString(2) +
+                        "/" + cursor.getString(3) + "/" + cursor.getString(4) +
+                        "/" + cursor.getString(5) + "/" + cursor.getString(6) +
+                        "/" + cursor.getString(7) + "/" + cursor.getString(8)
+            )
+        }
     }
 
     override fun onResume() {

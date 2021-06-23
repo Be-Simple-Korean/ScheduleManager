@@ -5,8 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.schedulemanager.R
+import com.example.schedulemanager.adapter.PlaceAdapter.Companion.NO_DATA
 import com.example.schedulemanager.viewmodel.MyViewModel
 import com.example.schedulemanager.data.DateVO
+import com.example.schedulemanager.database.DBManager
 import com.example.schedulemanager.databinding.ItemCalendarBinding
 import com.example.schedulemanager.lisetener.OnClickListener
 import java.util.*
@@ -54,7 +57,7 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
         } else {
             itemViewHolder.binding.tvCalendarDate.alpha = 1f
             if (dayList.get(position).day.toInt() == Calendar.getInstance().get(Calendar.DATE)) {
-                itemViewHolder.binding.rlCalendarToday.setBackgroundResource(R.drawable.shape_calendar_today)
+                itemViewHolder.binding.llCalendarToday.setBackgroundResource(R.drawable.shape_calendar_today)
             }
         }
         itemViewHolder.itemView.setOnClickListener(View.OnClickListener {

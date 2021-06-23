@@ -2,6 +2,8 @@ package com.example.schedulemanager
 
 import android.os.AsyncTask
 import android.util.Log
+import com.example.schedulemanager.database.DBManager
+import com.example.schedulemanager.viewmodel.MyViewModel
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
@@ -15,7 +17,7 @@ import java.io.IOException
 /**
      * 비동기적으로 데이터 요청 처리
      */
-    class RequestTask(mCredential: GoogleAccountCredential) : AsyncTask<Void, Void, Unit>() {
+    class RequestTask(mCredential: GoogleAccountCredential,val viewModel: MyViewModel) : AsyncTask<Void, Void, Unit>() {
         val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
         val jacksonFactory = JacksonFactory.getDefaultInstance()
         var mService: Calendar
@@ -90,15 +92,15 @@ import java.io.IOException
                                 "request data",
                                 title + "/" + date + "/" + time + "/" + contents + "/" + place
                             )
-//TODO
-//                            val id = DBManager.getId(title, date, time, place, contents, viewModel)
-//                            Log.e(title, id.toString())
-//                            if (id == -1) {
-//                                val sql =
-//                                    "insert into calendar (title,date,time,place,contents) values('" +
-//                                            title + "','" + date + "','" + time + "','" + place + "','" + contents + "')"
-//                                DBManager.insert(sql, viewModel)
-//                            }
+
+                            val id = DBManager.getId(title, date, time, place, contents, viewModel)
+                            Log.e(title, id.toString())
+                            if (id == -1) {
+                                val sql =
+                                    "insert into calendar (title,date,time,place,contents) values('" +
+                                            title + "','" + date + "','" + time + "','" + place + "','" + contents + "')"
+                                DBManager.insert(sql, viewModel)
+                            }
                         }
                     }
                 }
@@ -106,7 +108,13 @@ import java.io.IOException
             } while (pageToken != null)
         }
 
-        /**
+    override fun onPostExecute(result: Unit?) {
+        super.onPostExecute(result)
+        viewModel.setCalendarNotify()
+        viewModel.setBottomListNotify()
+    }
+
+    /**
          * 구글에서 가져온 날짜 데이터 변환
          */
         fun formatDate(dateTime: DateTime): String {

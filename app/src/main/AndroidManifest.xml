@@ -16,13 +16,15 @@
         <activity android:name=".activity.AddScheduleActivity"></activity>
         <activity android:name=".activity.ScheduleListActivity"/>
         <activity android:name=".activity.MainActivity">
-        <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyA-pWsYzC06L7QRonqvUGivijCCTSMNryw" />
         <receiver android:name=".receiver.MyBroadCastReceiver"/>
 
     </application>
