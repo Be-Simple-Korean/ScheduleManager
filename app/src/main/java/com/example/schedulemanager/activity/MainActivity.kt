@@ -7,10 +7,8 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.sqlite.SQLiteDatabase
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -20,11 +18,8 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.schedulemanager.viewmodel.MyViewModel
 import com.example.schedulemanager.R
 import com.example.schedulemanager.adapter.MyFragementStateAdapter
-import com.example.schedulemanager.adapter.SchduleListAdapter
-import com.example.schedulemanager.data.DateVO
-import com.example.schedulemanager.data.ScheduleDataVO
+import com.example.schedulemanager.adapter.ScheduleListAdapter
 import com.example.schedulemanager.databinding.ActivityMainBinding
-import com.example.schedulemanager.viewmodel.DataBaseType
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.util.ExponentialBackOff
@@ -32,48 +27,42 @@ import com.google.api.services.calendar.CalendarScopes
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
-    // TODO 달력 아이템 셀렉터 적용 - layoutList활용해서 클릭시 반복문으로 설정
+
     companion object {
         const val REQUEST_CODE = 1000
         const val REQUEST_GOOGLE_PLAY_SERVICES = 1002
         const val REQUEST_ACCOUNT_PICKER = 1003
     }
 
-    lateinit var binding: ActivityMainBinding
-    lateinit var viewModel: MyViewModel
-    lateinit var mCredential: GoogleAccountCredential
-    val schduleListAdapter = SchduleListAdapter()
-    
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var viewModel: MyViewModel
+    private lateinit var mCredential: GoogleAccountCredential
+    private val schduleListAdapter = ScheduleListAdapter()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
-        // Google Calendar API 사용하기 위해 필요한 인증 초기화( 자격 증명 credentials, 서비스 객체 )
-        // OAuth 2.0를 사용하여 구글 계정 선택 및 인증하기 위한 준비
+        viewModel.setDBHelper(this)
+
+        // Google Calendar API 사용하기 위해 필요한 인증 초기화
         mCredential = GoogleAccountCredential.usingOAuth2(
             this, Arrays.asList(CalendarScopes.CALENDAR)
         ).setBackOff(ExponentialBackOff())
 
-        viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
-        viewModel.setDBHelper(this)
-        viewModel.mainActivity = this
         createNotificationChannel()
+
         val myFragementStateAdapter = MyFragementStateAdapter(this)
         binding.viewPager2.adapter = myFragementStateAdapter
         myFragementStateAdapter.apply {
             binding.viewPager2.setCurrentItem(this.FIRST_POSITION, false)
         }
-        viewModel.setSelectToday()
+
+        val todayDateVO = viewModel.setSelectToday()
         binding.rvMainSchedule.adapter = schduleListAdapter
-        val calendar = Calendar.getInstance()
-        viewModel.setBottomList(
-            DateVO(
-                calendar.get(Calendar.YEAR).toString(),
-                (calendar.get(Calendar.MONTH) + 1).toString(),
-                calendar.get(Calendar.DATE).toString()
-            )
-        )
+
+        viewModel.setBottomList(todayDateVO)
 
         binding.viewPager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
@@ -110,18 +99,20 @@ class MainActivity : AppCompatActivity() {
 
         //상단 년월 데이터
         viewModel.yearMonth.observe(this, androidx.lifecycle.Observer {
-            binding.tvCalendarYearMonth.text=it
+            binding.tvCalendarYearMonth.text = it
         })
 
         //하단-상단-요일데이터
         viewModel.dayWeeks.observe(this, androidx.lifecycle.Observer {
-            binding.tvMainSelectDay.text=it
+            binding.tvMainSelectDay.text = it
         })
 
+        //하단 리스트데이터
         viewModel.mainSchduleList.observe(this, androidx.lifecycle.Observer {
             schduleListAdapter.scheduleList = it
             schduleListAdapter.notifyDataSetChanged()
         })
+
 //        val db: SQLiteDatabase = viewModel.getDatabase(DataBaseType.READ)
 //        val cursor = db.rawQuery(
 //            "select * from calendar ",
@@ -164,8 +155,8 @@ class MainActivity : AppCompatActivity() {
      */
     private fun getGoogleConditionResult() {
         if (!viewModel.isDeviceOnline(this)) {
-            Toast.makeText(this, "인터넷 연결좀", Toast.LENGTH_SHORT).show()
-        } else if (!viewModel.isGooglePlayServiceAvailable(this)) {
+            Toast.makeText(this, "인터넷을 연결해주세요!", Toast.LENGTH_SHORT).show()
+        } else if (!viewModel.isGooglePlayServiceAvailable(this)) { //구글플레이서비스 버전 검사
             val sCode = viewModel.updateServiceGuide(this)
             if (sCode != 0) {
                 showErrorDialog(sCode)
@@ -184,7 +175,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * 구글플레이서비스 업데이트 수행 대화상자
+     * 구글플레이서비스 에러 대화상자
      */
     private fun showErrorDialog(sCode: Int) {
         val apiAvailability = GoogleApiAvailability.getInstance()

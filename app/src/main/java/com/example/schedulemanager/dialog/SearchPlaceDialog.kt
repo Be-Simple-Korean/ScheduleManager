@@ -18,8 +18,9 @@ import com.example.schedulemanager.lisetener.OnClickListener
 import com.example.schedulemanager.lisetener.OnDismissListener
 import com.example.schedulemanager.viewmodel.MyViewModel
 
-
-
+/**
+ * 위치 검색 다이얼로그
+ */
 class SearchPlaceDialog(context: Context,val viewModel: MyViewModel) : Dialog(context) {
 
     companion object {

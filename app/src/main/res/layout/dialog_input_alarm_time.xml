@@ -70,8 +70,8 @@
                 android:id="@+id/tv_alarm_set"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="완료"
                 android:padding="10dp"
+                android:text="완료"
                 android:textColor="@color/blue"
                 android:textSize="20dp" />
         </LinearLayout>

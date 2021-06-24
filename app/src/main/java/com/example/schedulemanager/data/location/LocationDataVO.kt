@@ -1,8 +1,5 @@
 package  com.example.schedulemanager.data.location
 
-import com.example.schedulemanager.data.location.MetaVO
-
-
 /**
  * 카카오 API로 받는 Response DATA VO
  */

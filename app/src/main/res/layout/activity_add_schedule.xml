@@ -66,7 +66,7 @@
                     android:textSize="25dp" />
 
                 <EditText
-                    android:id="@+id/edit_schedule_add_title"
+                    android:id="@+id/et_schedule_add_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="20dp"

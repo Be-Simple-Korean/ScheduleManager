@@ -11,8 +11,7 @@ import com.example.schedulemanager.viewmodel.MyViewModel
  */
 object DBManager {
     private lateinit var db: SQLiteDatabase
-    var count = 0
-    lateinit var cursor:Cursor
+    private lateinit var cursor:Cursor
 
     fun getId(title:String, date:String, time:String, place:String, contents:String, viewModel: MyViewModel): Int {
         val sql = "select * from calendar where title ='"+title+"' and date = '"+date+"' and time = '"+time+"' and " +
@@ -20,7 +19,7 @@ object DBManager {
         Log.e("sql",sql)
         db=viewModel.getDatabase(DataBaseType.READ)
         
-        var cursor=db.rawQuery(sql,null)
+        val cursor=db.rawQuery(sql,null)
         Log.e("cursor.count",cursor.count.toString())
         var id=-1
         if(cursor!=null) {

@@ -12,6 +12,5 @@ import com.example.schedulemanager.dialog.SetAlarmDialog
 interface OnDismissListener {
     fun onDismissFromAlarm(dialog: SetAlarmDialog, time: String)
     fun onDismissListener(searchPlaceDialog: SearchPlaceDialog, documentsVO: DocumentsVO)
-    //    fun onDismissListener(searchLocationDialog: SearchLocationDialog, name:String)
     fun onDismissListener(dialog: DeleteGuideDialog)
 }

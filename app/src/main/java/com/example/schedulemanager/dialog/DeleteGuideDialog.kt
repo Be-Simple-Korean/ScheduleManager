@@ -11,10 +11,14 @@ import com.example.schedulemanager.databinding.DialogDeleteGuideBinding
 import com.example.schedulemanager.lisetener.OnDismissListener
 import com.example.schedulemanager.viewmodel.MyViewModel
 
-class DeleteGuideDialog(context: Context, val id: Int, val viewModel: MyViewModel) :
-    Dialog(context) {
-    lateinit var binding: DialogDeleteGuideBinding
+/**
+ * 일정 삭제 다이얼로그
+ */
+class DeleteGuideDialog(context: Context, val id: Int, val viewModel: MyViewModel) : Dialog(context) {
+
+    private lateinit var binding: DialogDeleteGuideBinding
     lateinit var onDismissListener: OnDismissListener
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DialogDeleteGuideBinding.inflate(layoutInflater)

@@ -17,9 +17,6 @@ data class DocumentsVO(
     val x: String = "",
     val y: String = ""
 ) {
-    fun setQuery(query:String){
-       this.place_name=query
-    }
     override fun toString(): String {
         return "documents = {" + "\n" +
                 "place_name = " + place_name + ",\n" +

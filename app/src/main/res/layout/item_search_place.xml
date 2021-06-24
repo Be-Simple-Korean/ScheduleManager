@@ -23,7 +23,7 @@
         android:layout_marginTop="10dp"
         android:singleLine="true"
         android:textSize="10dp"
-        tools:text="주소명" />
+        tools:text="주소" />
 
     <View
         android:layout_width="match_parent"

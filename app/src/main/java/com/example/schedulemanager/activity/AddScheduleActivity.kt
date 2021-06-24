@@ -3,14 +3,14 @@ package com.example.schedulemanager.activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.example.schedulemanager.viewmodel.MyViewModel
 import com.example.schedulemanager.R
 import com.example.schedulemanager.data.location.DocumentsVO
 import com.example.schedulemanager.database.DBManager
@@ -19,6 +19,7 @@ import com.example.schedulemanager.dialog.DeleteGuideDialog
 import com.example.schedulemanager.dialog.SearchPlaceDialog
 import com.example.schedulemanager.dialog.SetAlarmDialog
 import com.example.schedulemanager.lisetener.OnDismissListener
+import com.example.schedulemanager.viewmodel.MyViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -27,6 +28,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import java.util.*
 
+/**
+ * 일정 추가 액티비티
+ */
 class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object {
@@ -38,14 +42,14 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var selectMonth: String
     private lateinit var selectDay: String
     private lateinit var binding: ActivityAddScheduleBinding
-    lateinit var viewModel: MyViewModel
-    var selectCal = Calendar.getInstance()
-    var isUpdate = false
-    var hour = 0
-    var min = 0
-    var selectDoucments = DocumentsVO()
-    var alarmTime = ""
-    var oldId = -1
+    private lateinit var viewModel: MyViewModel
+    private var selectCal = Calendar.getInstance()
+    private var isUpdate = false
+    private var hour = 0
+    private var min = 0
+    private var selectDoucments = DocumentsVO()
+    private var alarmTime = ""
+    private var oldId = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,59 +57,53 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(binding.root)
         viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
         viewModel.setDBHelper(this)
+
         val calendar = Calendar.getInstance()
         hour = calendar.get(Calendar.HOUR_OF_DAY)
         min = calendar.get(Calendar.MINUTE)
+
         val intent = intent
         isUpdate = intent.getBooleanExtra("isUpdate", false)
-        Log.e("isUp", isUpdate.toString())
         if (isUpdate) {
-            val id = intent.getIntExtra("id",-1)
-            if(id==-1){
-                finish()
-            }
-//            val date = intent.getStringExtra("date").toString()
+            val id = intent.getIntExtra("id", -1)
             val sql = "select id from calendar where id=$id"
-            Log.e("sql", sql)
-//            val position = intent.getIntExtra("position", 0)
-//            Log.e("position", "$position")
             val cursor = DBManager.select(sql, viewModel)
-            Log.e("cc", "${cursor.count}")
-            if(cursor.count>0){
-                oldId=id
+            if (cursor.count > 0) {
+                oldId = id
             }
             if (oldId != -1) {
-                val sql = "select * from calendar where id=" + oldId
+                val sql = "select * from calendar where id=$oldId"
                 val cursor = DBManager.select(sql, viewModel)
                 while (cursor.moveToNext()) {
-                    binding.editScheduleAddTitle.setText(cursor.getString(1))
+                    binding.etScheduleAddTitle.setText(cursor.getString(1))
                     val date = cursor.getString(2)
                     selectCal.set(
                         date.split("-")[0].toInt(),
                         date.split("-")[1].toInt() - 1,
                         date.split("-")[2].toInt()
                     )
-                    Log.e("set cal", selectCal.time.toString())
+
                     binding.tvScheduleSelectedDate.text = cursor.getString(2)
                     if (cursor.getString(3).equals("종일")) {
                         binding.tvScheduleSelectedTime.text = cursor.getString(3)
                         hour = -1
                         min = -1
-                        selectCal.set(Calendar.HOUR_OF_DAY,0)
-                        selectCal.set(Calendar.MINUTE,0)
-                        selectCal.set(Calendar.SECOND,0)
+                        selectCal.set(Calendar.HOUR_OF_DAY, 0)
+                        selectCal.set(Calendar.MINUTE, 0)
+                        selectCal.set(Calendar.SECOND, 0)
                     } else {
                         val time = cursor.getString(3)
                         hour = time.split(":")[0].toInt()
                         min = time.split(":")[1].toInt()
-                        selectCal.set(Calendar.HOUR_OF_DAY,hour)
-                        selectCal.set(Calendar.MINUTE,min)
-                        selectCal.set(Calendar.SECOND,0)
+                        selectCal.set(Calendar.HOUR_OF_DAY, hour)
+                        selectCal.set(Calendar.MINUTE, min)
+                        selectCal.set(Calendar.SECOND, 0)
                         binding.tvScheduleSelectedTime.text = viewModel.getFilterSelectTime(
                             time.split(":")[0].toInt(),
                             time.split(":")[1].toInt()
                         )
                     }
+
                     binding.tvScheduleSelectedPlace.text = cursor.getString(4)
                     if (cursor.getString(5).trim().isNotEmpty()) {
                         binding.llMap.visibility = View.VISIBLE
@@ -119,27 +117,39 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
                         )
                         mapFragment.getMapAsync(this@AddScheduleActivity)
                     }
+
                     binding.etScheduleAddContents.setText(cursor.getString(7))
                     if (cursor.getString(8).trim().isNotEmpty()) {
                         alarmTime = cursor.getString(8)
-                        if(alarmTime.equals("0")){
+                        if (alarmTime == NO_INPUT_TIME) {
                             binding.tvScheduleSelectedAlarmTime.text = "일정 시작 시간"
-                        }else{
-                            binding.tvScheduleSelectedAlarmTime.text = (cursor.getString(8) + " 분 전")
+                        } else {
+                            binding.tvScheduleSelectedAlarmTime.text =
+                                (cursor.getString(8) + " 분 전")
                         }
-
+                    } else {
+                        binding.tvScheduleSelectedAlarmTime.text = "없음"
                     }
+
                     binding.llDelete.visibility = View.VISIBLE
-                    var curDateTime = Calendar.getInstance()
+                    val curDateTime = Calendar.getInstance()
                     curDateTime.set(Calendar.SECOND, 0)
-                    if(selectCal.before(curDateTime)){
-                        binding.ibScheduleCheck.visibility=View.GONE
+                    if (selectCal.before(curDateTime)) {
+                        binding.ibScheduleCheck.visibility = View.GONE
+                        binding.btnScheduleSelectDate.visibility = View.GONE
+                        binding.btnScheduleSelectTime.visibility = View.GONE
+                        binding.btnSelectPlace.visibility = View.GONE
+                        binding.btnScheduleSelectAlarmTime.visibility = View.GONE
+                        binding.etScheduleAddTitle.isEnabled = false
+                        binding.etScheduleAddTitle.setTextColor(Color.BLACK)
+                        binding.etScheduleAddContents.isEnabled = false
+                        binding.etScheduleAddContents.setTextColor(Color.BLACK)
                     }
                 }
             }
         } else {
             //키보드 나타내기
-            binding.editScheduleAddTitle.requestFocus()
+            binding.etScheduleAddTitle.requestFocus()
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.toggleSoftInput(
                 InputMethodManager.SHOW_FORCED,
@@ -147,20 +157,13 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
             )
         }
 
-        val timePickerDialog: TimePickerDialog
-        timePickerDialog = TimePickerDialog(
-            this, timePickerListener,
-            hour,
-            min, false
-        )
-
         //닫기 이미지버튼 클릭
         binding.ibScheduleClose.setOnClickListener {
             finish()
         }
 
         //날짜 선택 버튼 클릭
-        binding.btnScheduleSelectDate.setOnClickListener(View.OnClickListener {
+        binding.btnScheduleSelectDate.setOnClickListener {
             val datePickerDialog = DatePickerDialog(
                 this,
                 dateSetlistener,
@@ -169,12 +172,17 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
                 selectCal.get(Calendar.DATE)
             )
             datePickerDialog.show()
-        })
+        }
 
         //시간 선택 버튼 클릭이벤트
-        binding.btnScheduleSelectTime.setOnClickListener(View.OnClickListener {
+        binding.btnScheduleSelectTime.setOnClickListener {
+            val timePickerDialog = TimePickerDialog(
+                this, timePickerListener,
+                hour,
+                min, false
+            )
             timePickerDialog.show()
-        })
+        }
 
         // 위치 선택 버튼 클릭이벤트
         binding.btnSelectPlace.setOnClickListener {
@@ -186,14 +194,8 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
         //알람 선택버튼 클릭
         binding.btnScheduleSelectAlarmTime.setOnClickListener {
             var time = binding.tvScheduleSelectedAlarmTime.text.toString()
-            if (time.contains(TIME_NOW)) {
-                time =
-                    NO_INPUT_TIME
-            } else {
-                time = time.split(" ")[0]
-            }
             time = if (time.contains(TIME_NOW)) NO_INPUT_TIME else time.split(" ")[0]
-            var setAlarmDialog =
+            val setAlarmDialog =
                 SetAlarmDialog(this, time)
             setAlarmDialog.onDismissListener = onDimissListener
             setAlarmDialog.show()
@@ -201,7 +203,7 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
 
         //체크 이미지버튼 클릭
         binding.ibScheduleCheck.setOnClickListener {
-            val title: String = binding.editScheduleAddTitle.text.toString()
+            val title: String = binding.etScheduleAddTitle.text.toString()
             val place = binding.tvScheduleSelectedPlace.text.toString()
             val contents = binding.etScheduleAddContents.text.toString()
             if (title.trim().isEmpty()) {
@@ -217,24 +219,17 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
                 Toast.makeText(this, "시간을 선택해주세요", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            var curDateTime = Calendar.getInstance()
+            val curDateTime = Calendar.getInstance()
             curDateTime.set(Calendar.SECOND, 0)
             if (selectCal.before(curDateTime)) {
                 Toast.makeText(this, "현재 시간 이후로 설정해주세요", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             if (isUpdate) {
-                Log.e(
-                    "send",
-                    selectCal.get(Calendar.YEAR)
-                        .toString() + "." + (selectCal.get(Calendar.MONTH) + 1) + "." + selectCal.get(
-                        Calendar.DATE
-                    )
-                )
                 viewModel.update(
                     this,
                     title,
-                    hour.toString() + ":" + min.toString(),
+                    "$hour:$min",
                     place,
                     selectDoucments.y,
                     selectDoucments.x,
@@ -247,7 +242,7 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
                 viewModel.addSchedule(
                     this,
                     title,
-                    hour.toString() + ":" + min.toString(),
+                    "$hour:$min",
                     place,
                     selectDoucments.y,
                     selectDoucments.x,
@@ -290,7 +285,7 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
     var onDimissListener = object : OnDismissListener {
         override fun onDismissFromAlarm(dialog: SetAlarmDialog, time: String) {
             dialog.dismiss()
-            if (time.equals(NO_INPUT_TIME)) {
+            if (time == NO_INPUT_TIME) {
                 binding.tvScheduleSelectedAlarmTime.text = "일정 시작 시간"
             } else {
                 binding.tvScheduleSelectedAlarmTime.text = "$time 분 전"
@@ -325,9 +320,9 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
         val map = googleMap
 
         selectDoucments.let {
-            var located = LatLng(it.y.toDouble(), it.x.toDouble())
+            val located = LatLng(it.y.toDouble(), it.x.toDouble())
 
-            var markerOptions = MarkerOptions()
+            val markerOptions = MarkerOptions()
             markerOptions.position(located)
             markerOptions.title(it.place_name)
 //            markerOptions.snippet(it.address_name)

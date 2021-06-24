@@ -21,7 +21,7 @@ class SetAlarmDialog(context: Context, private val data: String) : Dialog(contex
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding= DialogInputAlarmTimeBinding.inflate(layoutInflater)
+        val binding = DialogInputAlarmTimeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -34,31 +34,31 @@ class SetAlarmDialog(context: Context, private val data: String) : Dialog(contex
             it.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
 
-        if (!data.equals("")) {
+        if (data != "") {
             binding.etSetAlarmTime.setText(data)
         }
 
         //바깥 영역 클릭 이벤트
-        binding.flInputAlarmDialog.setOnClickListener(View.OnClickListener {
+        binding.flInputAlarmDialog.setOnClickListener {
             dismiss()
-        })
+        }
 
         //취소 텍스트 클릭 이벤트
-        binding.tvAlarmCancel.setOnClickListener(View.OnClickListener {
+        binding.tvAlarmCancel.setOnClickListener {
             dismiss()
-        })
+        }
 
-        binding.llDialogAlarm.setOnClickListener{}
+        binding.llDialogAlarm.setOnClickListener {}
 
         //완료 텍스트 클릭이벤트
-        binding.tvAlarmSet.setOnClickListener(View.OnClickListener {
+        binding.tvAlarmSet.setOnClickListener{
             imm.hideSoftInputFromWindow(binding.etSetAlarmTime.windowToken, 0)
-            if (binding.etSetAlarmTime.text.trim().length == 0) {
+            if (binding.etSetAlarmTime.text.trim().isEmpty()) {
                 dismiss()
             } else {
-                var time =binding.etSetAlarmTime.text.toString().toInt().toString()
+                val time = binding.etSetAlarmTime.text.toString().toInt().toString()
                 onDismissListener.onDismissFromAlarm(this, time)
             }
-        })
+        }
     }
 }

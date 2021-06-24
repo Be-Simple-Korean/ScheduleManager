@@ -32,7 +32,6 @@ class RequestTask(mCredential: GoogleAccountCredential, val viewModel: MyViewMod
     override fun doInBackground(vararg params: Void?): Unit {
         var id: String? = null
         var pageToken: String? = null
-        Log.e("수행", "!!12")
         do {
             var calendarList: CalendarList? = null
             try {
@@ -43,43 +42,37 @@ class RequestTask(mCredential: GoogleAccountCredential, val viewModel: MyViewMod
                 e.printStackTrace()
             }
 
-            var items = calendarList?.items
-            Log.e("items size", items?.size.toString())
+            val items = calendarList?.items
             items?.let {
                 for (calendarListEntry in items) {
-                    Log.e("summary", calendarListEntry.getSummary())
                     if (calendarListEntry.getSummary().equals("대한민국의 휴일")) {
                         continue
                     }
                     id = calendarListEntry.id
-                    var events = mService.events().list(id)
+                    val events = mService.events().list(id)
                         .setOrderBy("startTime")
                         .setSingleEvents(true)
                         .execute()
-                    var items = events.items
+                    val items = events.items
                     for (event in items) {
-
                         val title = event.summary ?: "제목없음"
                         var date = ""
                         var time = ""
                         if (event.start.date != null) {
-                            Log.e(title, event.start.date.toString())
-                            var eventDate = event.start.date.toString()
-                            var year = eventDate.split("-")[0]
-                            var month = eventDate.split("-")[1]
-                            var day = eventDate.split("-")[2]
-                            date = year.toString()+ "-" + month + "-" + day
-                            Log.e("from google date", date)
+                            val eventDate = event.start.date.toString()
+                            val year = eventDate.split("-")[0]
+                            val month = eventDate.split("-")[1]
+                            val day = eventDate.split("-")[2]
+                            date = "$year-$month-$day"
                             time = "종일"
                         }
                         if (event.start.dateTime != null) {
-                            var datetime = formatDate(event.start.dateTime)
+                            val datetime = formatDate(event.start.dateTime)
                             date = datetime.split(" ")[0]
-                            var year = date.split("-")[0]
-                            var month = date.split("-")[1]
-                            var day = date.split("-")[2]
-                            date = year.toString() + "-" + month + "-" + day
-                            Log.e("from google date", date)
+                            val year = date.split("-")[0]
+                            val month = date.split("-")[1]
+                            val day = date.split("-")[2]
+                            date = "$year-$month-$day"
                             time = datetime.split(" ")[1]
                             time = time.split(":")[0] + ":" + time.split(":")[1]
                         }
@@ -89,10 +82,6 @@ class RequestTask(mCredential: GoogleAccountCredential, val viewModel: MyViewMod
                         if (event.location != null) {
                             place = event.location.split(",")[0]
                         }
-                        Log.e(
-                            "request data",
-                            title + "/" + date + "/" + time + "/" + contents + "/" + place
-                        )
 
                         val id = DBManager.getId(title, date, time, place, contents, viewModel)
                         Log.e(title, id.toString())
@@ -100,7 +89,6 @@ class RequestTask(mCredential: GoogleAccountCredential, val viewModel: MyViewMod
                             val sql =
                                 "insert into calendar (title,date,time,place,contents) values('" +
                                         title + "','" + date + "','" + time + "','" + place + "','" + contents + "')"
-                            Log.e("수행", "insert")
                             DBManager.insert(sql, viewModel)
                         }
                     }
@@ -112,7 +100,6 @@ class RequestTask(mCredential: GoogleAccountCredential, val viewModel: MyViewMod
 
     override fun onPostExecute(result: Unit?) {
         super.onPostExecute(result)
-        Log.e("수행","onPost")
         viewModel.setCalendarNotify()
         viewModel.setBottomListNotify()
     }

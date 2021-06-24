@@ -1,9 +1,9 @@
 package com.example.schedulemanager.activity
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.example.schedulemanager.adapter.SchduleListAdapter
+import com.example.schedulemanager.adapter.ScheduleListAdapter
 import com.example.schedulemanager.databinding.ActivityScheduleListBinding
 import com.example.schedulemanager.viewmodel.MyViewModel
 
@@ -13,16 +13,17 @@ import com.example.schedulemanager.viewmodel.MyViewModel
  */
 class ScheduleListActivity : AppCompatActivity() {
 
-    lateinit var binding: ActivityScheduleListBinding
-    lateinit var viewModel: MyViewModel
-    lateinit var schduleListAdapter: SchduleListAdapter
+    private lateinit var binding: ActivityScheduleListBinding
+    private lateinit var viewModel: MyViewModel
+    private  lateinit var schduleListAdapter: ScheduleListAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityScheduleListBinding.inflate(layoutInflater)
         setContentView(binding.root)
         viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
         viewModel.setDBHelper(this)
-        schduleListAdapter = SchduleListAdapter()
+        schduleListAdapter = ScheduleListAdapter()
         binding.rvScheduleList.adapter = schduleListAdapter
     }
 

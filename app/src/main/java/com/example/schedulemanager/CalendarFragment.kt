@@ -15,11 +15,13 @@ import com.example.schedulemanager.databinding.FragmentCalendarBinding
 import com.example.schedulemanager.lisetener.OnClickListener
 import com.example.schedulemanager.viewmodel.MyViewModel
 
+/**
+ * 달력 프래그먼트
+ */
 class CalendarFragment : Fragment() {
 
-    lateinit var binding: FragmentCalendarBinding
-    lateinit var viewModel: MyViewModel
-
+    private lateinit var binding: FragmentCalendarBinding
+    private lateinit var viewModel: MyViewModel
     var pageIndex = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +33,6 @@ class CalendarFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.e("수행", "!!")
         binding = FragmentCalendarBinding.bind(
             inflater.inflate(
                 R.layout.fragment_calendar,

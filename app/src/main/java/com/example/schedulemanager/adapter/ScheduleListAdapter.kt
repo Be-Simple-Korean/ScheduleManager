@@ -1,16 +1,14 @@
 package com.example.schedulemanager.adapter
 
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schedulemanager.activity.AddScheduleActivity
 import com.example.schedulemanager.data.ScheduleDataVO
 import com.example.schedulemanager.databinding.ItemScheduleBinding
-import com.example.schedulemanager.lisetener.OnClickListener
 
-class SchduleListAdapter : RecyclerView.Adapter<SchduleListAdapter.ItemViewHolder>() {
+class ScheduleListAdapter : RecyclerView.Adapter<ScheduleListAdapter.ItemViewHolder>() {
 
     companion object {
         const val DATELIST = 1
@@ -18,13 +16,8 @@ class SchduleListAdapter : RecyclerView.Adapter<SchduleListAdapter.ItemViewHolde
     }
 
     var scheduleList = arrayListOf<ScheduleDataVO>()
-    lateinit var onClickListener: OnClickListener
-
-    inner class ItemViewHolder(val binding: ItemScheduleBinding) :
-        RecyclerView.ViewHolder(binding.root) {}
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-//        ItemSearchPlaceBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         val binding =
             ItemScheduleBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ItemViewHolder(binding)
@@ -35,19 +28,19 @@ class SchduleListAdapter : RecyclerView.Adapter<SchduleListAdapter.ItemViewHolde
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-        holder.binding.tvItemScheduleTitle.text = scheduleList.get(position).title
+        holder.binding.tvItemScheduleTitle.text = scheduleList[position].title
         var subData = ""
-        when (scheduleList.get(position).viewType) {
+        when (scheduleList[position].viewType) {
             DATELIST -> {
-                subData = scheduleList.get(position).time
-                if (scheduleList.get(position).place.trim().isNotEmpty()) {
-                    subData = subData + ", " + scheduleList.get(position).place
+                subData = scheduleList[position].time
+                if (scheduleList[position].place.trim().isNotEmpty()) {
+                    subData = subData + ", " + scheduleList[position].place
                 }
             }
             FULLLUST -> {
-                subData = scheduleList.get(position).date + " " + scheduleList.get(position).time
-                if (scheduleList.get(position).place.trim().isNotEmpty()) {
-                    subData = subData + ", " + scheduleList.get(position).place
+                subData = scheduleList[position].date + " " + scheduleList[position].time
+                if (scheduleList[position].place.trim().isNotEmpty()) {
+                    subData = subData + ", " + scheduleList[position].place
                 }
             }
         }
@@ -55,15 +48,16 @@ class SchduleListAdapter : RecyclerView.Adapter<SchduleListAdapter.ItemViewHolde
 
         holder.itemView.setOnClickListener {
             val intent = Intent(it.context, AddScheduleActivity::class.java)
-            Log.e("수행", position.toString())
             intent.putExtra("isUpdate", true)
-            Log.e("send date", scheduleList.get(position).date)
-            intent.putExtra("date", scheduleList.get(position).date)
-            intent.putExtra("id",scheduleList.get(position).id)
-
+            intent.putExtra("date", scheduleList[position].date)
+            intent.putExtra("id", scheduleList[position].id)
             it.context.startActivity(intent)
-
         }
     }
+
+    /**
+     * 일정아이템 뷰홀더
+     */
+    inner class ItemViewHolder(val binding: ItemScheduleBinding) : RecyclerView.ViewHolder(binding.root)
 
 }
