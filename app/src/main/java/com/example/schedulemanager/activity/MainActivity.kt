@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -37,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MyViewModel
     private lateinit var mCredential: GoogleAccountCredential
-    private val schduleListAdapter = ScheduleListAdapter()
+    private val scheduleListAdapter = ScheduleListAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 
         // Google Calendar API 사용하기 위해 필요한 인증 초기화
         mCredential = GoogleAccountCredential.usingOAuth2(
-            this, Arrays.asList(CalendarScopes.CALENDAR)
+            this, listOf(CalendarScopes.CALENDAR)
         ).setBackOff(ExponentialBackOff())
 
         createNotificationChannel()
@@ -60,13 +61,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         val todayDateVO = viewModel.setSelectToday()
-        binding.rvMainSchedule.adapter = schduleListAdapter
+        binding.rvMainSchedule.adapter = scheduleListAdapter
 
         viewModel.setBottomList(todayDateVO)
 
         binding.viewPager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
+                Log.e("postion in main",position.toString())
                 viewModel.setDate(position)
             }
         })
@@ -109,8 +111,8 @@ class MainActivity : AppCompatActivity() {
 
         //하단 리스트데이터
         viewModel.mainSchduleList.observe(this, androidx.lifecycle.Observer {
-            schduleListAdapter.scheduleList = it
-            schduleListAdapter.notifyDataSetChanged()
+            scheduleListAdapter.scheduleList = it
+            scheduleListAdapter.notifyDataSetChanged()
         })
 
 //        val db: SQLiteDatabase = viewModel.getDatabase(DataBaseType.READ)

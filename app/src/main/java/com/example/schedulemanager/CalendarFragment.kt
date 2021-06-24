@@ -15,6 +15,10 @@ import com.example.schedulemanager.databinding.FragmentCalendarBinding
 import com.example.schedulemanager.lisetener.OnClickListener
 import com.example.schedulemanager.viewmodel.MyViewModel
 
+enum class MonthType {
+    PREVIOUS, NOW, NEXT
+}
+
 /**
  * 달력 프래그먼트
  */
@@ -46,14 +50,33 @@ class CalendarFragment : Fragment() {
         binding.rvCalendar.adapter = calendarAdapter
         viewModel.calendarAdapter = calendarAdapter
         calendarAdapter.notifyDataSetChanged()
+        Log.e("postion set",pageIndex.toString())
         viewModel.setDate(pageIndex)
         return binding.root
     }
 
     val onClickListener = object : OnClickListener {
-        override fun onCalendarItemClickListener(dateVO: DateVO, week: String) {
+        override fun onCalendarItemClickListener(
+            dateVO: DateVO,
+            week: String,
+            monthType: MonthType
+        ) {
+//            when (monthType) {
+//                MonthType.PREVIOUS -> {
+//                    viewModel.setDate(pageIndex-1)
+//                }
+//                MonthType.NOW -> {
+//                    viewModel.setSelectDay(dateVO, week)
+//                    viewModel.setBottomList(dateVO)
+//                }
+//                MonthType.NEXT -> {
+//
+//                    viewModel.setDate(pageIndex+1)
+//                }
+//            }
             viewModel.setSelectDay(dateVO, week)
             viewModel.setBottomList(dateVO)
+
         }
 
         override fun onClickListener(v: View, documentsVO: DocumentsVO) {

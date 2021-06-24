@@ -2,10 +2,12 @@ package com.example.schedulemanager.adapter
 
 import android.graphics.Color
 import android.graphics.Typeface
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.schedulemanager.MonthType
 import com.example.schedulemanager.R
 import com.example.schedulemanager.adapter.PlaceAdapter.Companion.NO_DATA
 import com.example.schedulemanager.viewmodel.MyViewModel
@@ -84,6 +86,17 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
 
         //클릭 이벤트
         holder.itemView.setOnClickListener{
+            Log.e("data compare",curShowMonth.toString()+"/"+dayList[position].month)
+            val monthType :MonthType
+            val selectMonth=dayList[position].month.toInt()
+            if(curShowMonth>selectMonth){
+                monthType=MonthType.PREVIOUS
+            }else if(curShowMonth==selectMonth){
+                monthType=MonthType.NOW
+            }else{
+                monthType=MonthType.NEXT
+            }
+
             for (i in 0 until dayList.size) {
                 dayList[i].isSelect = i == position
             }
@@ -112,7 +125,8 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
                     4 -> "목"
                     5 -> "금"
                     else -> "토"
-                }
+                },
+                monthType
             )
         }
 
