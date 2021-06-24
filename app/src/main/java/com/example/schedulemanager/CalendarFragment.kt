@@ -20,35 +20,38 @@ class CalendarFragment : Fragment() {
     lateinit var binding: FragmentCalendarBinding
     lateinit var viewModel: MyViewModel
 
-    var pageIndex=0
+    var pageIndex = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel= ViewModelProvider(requireActivity()).get(MyViewModel::class.java)
+        viewModel = ViewModelProvider(requireActivity()).get(MyViewModel::class.java)
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.e("수행","!!")
-        binding= FragmentCalendarBinding.bind(inflater.inflate(R.layout.fragment_calendar, container, false))
-        val calendarAdapter= CalendarAdapter()
-        calendarAdapter.onClickListener=onClickListener
-        calendarAdapter.viewModel=viewModel
-        binding.rvCalendar.adapter=calendarAdapter
-        viewModel.calendarAdapter=calendarAdapter
+        Log.e("수행", "!!")
+        binding = FragmentCalendarBinding.bind(
+            inflater.inflate(
+                R.layout.fragment_calendar,
+                container,
+                false
+            )
+        )
+        val calendarAdapter = CalendarAdapter()
+        calendarAdapter.onClickListener = onClickListener
+        calendarAdapter.viewModel = viewModel
+        binding.rvCalendar.adapter = calendarAdapter
+        viewModel.calendarAdapter = calendarAdapter
         calendarAdapter.notifyDataSetChanged()
         viewModel.setDate(pageIndex)
-
-
-
         return binding.root
     }
 
-    val onClickListener=object : OnClickListener {
+    val onClickListener = object : OnClickListener {
         override fun onCalendarItemClickListener(dateVO: DateVO, week: String) {
-            viewModel.setSelectDay(dateVO,week)
+            viewModel.setSelectDay(dateVO, week)
             viewModel.setBottomList(dateVO)
         }
 
