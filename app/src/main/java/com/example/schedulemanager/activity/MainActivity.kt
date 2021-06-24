@@ -64,12 +64,19 @@ class MainActivity : AppCompatActivity() {
         binding.rvMainSchedule.adapter = scheduleListAdapter
 
         viewModel.setBottomList(todayDateVO)
+        viewModel.pageIndex.observe(this, androidx.lifecycle.Observer {
+            Log.e("observe",it.toString())
 
+            binding.viewPager2.setCurrentItem(it,false)
+            viewModel.setDate()
+        })
         binding.viewPager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                Log.e("postion in main",position.toString())
-                viewModel.setDate(position)
+                Log.e("page in change",position.toString())
+//                binding.viewPager2.setCurrentItem(position,false)
+                viewModel.pageIndex.value=position
+                viewModel.setDate()
             }
         })
 

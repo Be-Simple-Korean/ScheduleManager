@@ -64,6 +64,7 @@ class MyViewModel : ViewModel() {
     lateinit var calendarAdapter: CalendarAdapter
     lateinit var curSelectDateVO: DateVO
 
+    var pageIndex=MutableLiveData<Int>()
 
     //상단의 타이틀
     var yearMonth = MutableLiveData<String>()
@@ -127,8 +128,8 @@ class MyViewModel : ViewModel() {
     /**
      * 상단의 년.월 설정
      */
-    fun setDate(pageIndex: Int) {
-        var page = pageIndex
+    fun setDate() {
+        var page = pageIndex.value!!
         page -= (Int.MAX_VALUE / 2)
         val date = Calendar.getInstance().run {
             add(Calendar.MONTH, page)

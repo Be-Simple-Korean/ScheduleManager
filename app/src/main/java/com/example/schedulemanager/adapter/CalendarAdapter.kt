@@ -86,7 +86,6 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
 
         //클릭 이벤트
         holder.itemView.setOnClickListener{
-            Log.e("data compare",curShowMonth.toString()+"/"+dayList[position].month)
             val monthType :MonthType
             val selectMonth=dayList[position].month.toInt()
             if(curShowMonth>selectMonth){

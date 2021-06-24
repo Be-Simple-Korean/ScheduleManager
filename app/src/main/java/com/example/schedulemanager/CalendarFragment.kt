@@ -51,7 +51,8 @@ class CalendarFragment : Fragment() {
         viewModel.calendarAdapter = calendarAdapter
         calendarAdapter.notifyDataSetChanged()
         Log.e("postion set",pageIndex.toString())
-        viewModel.setDate(pageIndex)
+        viewModel.pageIndex.value=pageIndex
+        viewModel.setDate()
         return binding.root
     }
 
@@ -61,19 +62,24 @@ class CalendarFragment : Fragment() {
             week: String,
             monthType: MonthType
         ) {
-//            when (monthType) {
-//                MonthType.PREVIOUS -> {
-//                    viewModel.setDate(pageIndex-1)
-//                }
-//                MonthType.NOW -> {
-//                    viewModel.setSelectDay(dateVO, week)
-//                    viewModel.setBottomList(dateVO)
-//                }
-//                MonthType.NEXT -> {
-//
-//                    viewModel.setDate(pageIndex+1)
-//                }
-//            }
+            when (monthType) {
+                MonthType.PREVIOUS -> {
+                    Log.e("before",viewModel.pageIndex.value.toString())
+                    viewModel.pageIndex.value=viewModel.pageIndex.value!!.minus(1)
+                    Log.e("after",viewModel.pageIndex.value.toString())
+                    viewModel.setDate()
+                }
+                MonthType.NOW -> {
+                    viewModel.setSelectDay(dateVO, week)
+                    viewModel.setBottomList(dateVO)
+                }
+                MonthType.NEXT -> {
+                    Log.e("before",viewModel.pageIndex.value.toString())
+                    viewModel.pageIndex.value= viewModel.pageIndex.value!!.plus(1)
+                    Log.e("after",viewModel.pageIndex.value.toString())
+                    viewModel.setDate()
+                }
+            }
             viewModel.setSelectDay(dateVO, week)
             viewModel.setBottomList(dateVO)
 
