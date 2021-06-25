@@ -1,7 +1,9 @@
 package com.example.schedulemanager
 
+import android.content.Context
 import android.os.AsyncTask
 import android.util.Log
+import android.widget.Toast
 import com.example.schedulemanager.database.DBManager
 import com.example.schedulemanager.viewmodel.MyViewModel
 import com.google.api.client.extensions.android.http.AndroidHttp
@@ -17,35 +19,36 @@ import java.io.IOException
 /**
  * 비동기적으로 데이터 요청 처리
  */
-class RequestTask(mCredential: GoogleAccountCredential, val viewModel: MyViewModel) :
-    AsyncTask<Void, Void, Unit>() {
-    val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
-    val jacksonFactory = JacksonFactory.getDefaultInstance()
-    var mService: Calendar
+class RequestGoogleCalendar(val context: Context, val viewModel: MyViewModel) :
+    AsyncTask<Void, Void, Boolean>() {
+    private val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
+    private val jacksonFactory: JacksonFactory = JacksonFactory.getDefaultInstance()
+    //구글캘린더 서비스객체
+    private var mService: Calendar
 
     init {
-        mService = Calendar.Builder(transport, jacksonFactory, mCredential)
+        mService = Calendar.Builder(transport, jacksonFactory, viewModel.mCredential)
             .setApplicationName("Google Calendar API Android QuickStart")
             .build()
     }
 
-    override fun doInBackground(vararg params: Void?): Unit {
-        var id: String? = null
+    override fun doInBackground(vararg params: Void?): Boolean {
+        var id: String?
         var pageToken: String? = null
         do {
             var calendarList: CalendarList? = null
             try {
                 calendarList = mService.calendarList().list().setPageToken(pageToken).execute()
             } catch (e: UserRecoverableAuthIOException) {
-                e.printStackTrace()
+                return false
             } catch (e: IOException) {
-                e.printStackTrace()
+                return false
             }
 
-            val items = calendarList?.items
-            items?.let {
-                for (calendarListEntry in items) {
-                    if (calendarListEntry.getSummary().equals("대한민국의 휴일")) {
+            val calendarItems = calendarList?.items
+            calendarItems?.let {
+                for (calendarListEntry in calendarItems) {
+                    if (calendarListEntry.summary == "대한민국의 휴일") {
                         continue
                     }
                     id = calendarListEntry.id
@@ -83,9 +86,9 @@ class RequestTask(mCredential: GoogleAccountCredential, val viewModel: MyViewMod
                             place = event.location.split(",")[0]
                         }
 
-                        val id = DBManager.getId(title, date, time, place, contents, viewModel)
+                        val dataId = DBManager.getId(title, date, time, place, contents, viewModel)
                         Log.e(title, id.toString())
-                        if (id == -1) {
+                        if (dataId == -1) {
                             val sql =
                                 "insert into calendar (title,date,time,place,contents) values('" +
                                         title + "','" + date + "','" + time + "','" + place + "','" + contents + "')"
@@ -96,19 +99,25 @@ class RequestTask(mCredential: GoogleAccountCredential, val viewModel: MyViewMod
             }
             pageToken = calendarList?.nextPageToken
         } while (pageToken != null)
+        return true
     }
 
-    override fun onPostExecute(result: Unit?) {
+    override fun onPostExecute(result: Boolean) {
         super.onPostExecute(result)
-        viewModel.setCalendarNotify()
-        viewModel.setBottomListNotify()
+        if (result) {
+            viewModel.setCalendarNotify()
+            viewModel.setBottomListNotify()
+        } else {
+            Toast.makeText(context, "에러 발생!", Toast.LENGTH_SHORT).show()
+            viewModel.mCredential.selectedAccountName = null
+        }
     }
 
     /**
      * 구글에서 가져온 날짜 데이터 변환
      */
-    fun formatDate(dateTime: DateTime): String {
-        var str = String.format("%s", dateTime)
+    private fun formatDate(dateTime: DateTime): String {
+        val str = String.format("%s", dateTime)
         var data: String = ""
         for (i in str) {
             if (i == 'T') {

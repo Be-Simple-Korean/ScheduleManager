@@ -21,11 +21,11 @@ import com.example.schedulemanager.R
 import com.example.schedulemanager.adapter.MyFragementStateAdapter
 import com.example.schedulemanager.adapter.ScheduleListAdapter
 import com.example.schedulemanager.databinding.ActivityMainBinding
+import com.example.schedulemanager.dialog.SearchPlaceDialog
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.util.ExponentialBackOff
 import com.google.api.services.calendar.CalendarScopes
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MyViewModel
-    private lateinit var mCredential: GoogleAccountCredential
     private val scheduleListAdapter = ScheduleListAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.setDBHelper(this)
 
         // Google Calendar API 사용하기 위해 필요한 인증 초기화
-        mCredential = GoogleAccountCredential.usingOAuth2(
+        viewModel.mCredential = GoogleAccountCredential.usingOAuth2(
             this, listOf(CalendarScopes.CALENDAR)
         ).setBackOff(ExponentialBackOff())
 
@@ -64,19 +63,21 @@ class MainActivity : AppCompatActivity() {
         binding.rvMainSchedule.adapter = scheduleListAdapter
 
         viewModel.setBottomList(todayDateVO)
-        viewModel.pageIndex.observe(this, androidx.lifecycle.Observer {
-            Log.e("observe",it.toString())
+//        viewModel.pageIndex.observe(this, androidx.lifecycle.Observer {
+//            Log.e("observe",it.toString())
+//            binding.viewPager2.setCurrentItem(it,false)
+//            Log.e("cur viewpager page1",binding.viewPager2.currentItem.toString())
+//            viewModel.setDate(pageIndex)
+//        })
 
-            binding.viewPager2.setCurrentItem(it,false)
-            viewModel.setDate()
-        })
         binding.viewPager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                Log.e("page in change",position.toString())
+//                Log.e("page in change",position.toString())
+//                Log.e("cur viewpager page2",binding.viewPager2.currentItem.toString())
 //                binding.viewPager2.setCurrentItem(position,false)
-                viewModel.pageIndex.value=position
-                viewModel.setDate()
+//                viewModel.pageIndex.value=position
+                viewModel.setDate(position)
             }
         })
 
@@ -172,14 +173,14 @@ class MainActivity : AppCompatActivity() {
             } else {
                 getGoogleConditionResult()
             }
-        } else if (mCredential.selectedAccountName == null) {
+        } else if (viewModel.mCredential.selectedAccountName == null) {
             // 사용자가 구글 계정을 선택할 수 있는 다이얼로그를 보여준다.
             startActivityForResult(
-                mCredential.newChooseAccountIntent(),
+                viewModel.mCredential.newChooseAccountIntent(),
                 REQUEST_ACCOUNT_PICKER
             )
         } else {
-            viewModel.requestCalendarData(mCredential)
+            viewModel.requestCalendarData(this)
         }
     }
 
@@ -213,7 +214,7 @@ class MainActivity : AppCompatActivity() {
         when (requestCode) {
             REQUEST_ACCOUNT_PICKER ->
                 if (resultCode == Activity.RESULT_OK && data != null && data.extras != null) {
-                    mCredential.selectedAccountName =
+                    viewModel.mCredential.selectedAccountName =
                         data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
                     getGoogleConditionResult()
                 }

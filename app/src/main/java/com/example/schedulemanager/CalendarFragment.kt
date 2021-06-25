@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.schedulemanager.adapter.CalendarAdapter
 import com.example.schedulemanager.data.DateVO
@@ -50,9 +49,8 @@ class CalendarFragment : Fragment() {
         binding.rvCalendar.adapter = calendarAdapter
         viewModel.calendarAdapter = calendarAdapter
         calendarAdapter.notifyDataSetChanged()
-        Log.e("postion set",pageIndex.toString())
-        viewModel.pageIndex.value=pageIndex
-        viewModel.setDate()
+//        viewModel.pageIndex.value=pageIndex
+        viewModel.setDate(pageIndex)
         return binding.root
     }
 
@@ -62,26 +60,31 @@ class CalendarFragment : Fragment() {
             week: String,
             monthType: MonthType
         ) {
-            when (monthType) {
-                MonthType.PREVIOUS -> {
-                    Log.e("before",viewModel.pageIndex.value.toString())
-                    viewModel.pageIndex.value=viewModel.pageIndex.value!!.minus(1)
-                    Log.e("after",viewModel.pageIndex.value.toString())
-                    viewModel.setDate()
-                }
-                MonthType.NOW -> {
-                    viewModel.setSelectDay(dateVO, week)
-                    viewModel.setBottomList(dateVO)
-                }
-                MonthType.NEXT -> {
-                    Log.e("before",viewModel.pageIndex.value.toString())
-                    viewModel.pageIndex.value= viewModel.pageIndex.value!!.plus(1)
-                    Log.e("after",viewModel.pageIndex.value.toString())
-                    viewModel.setDate()
-                }
-            }
             viewModel.setSelectDay(dateVO, week)
             viewModel.setBottomList(dateVO)
+//
+//            when (monthType) {
+//                MonthType.PREVIOUS -> {
+//                    Log.e("before",viewModel.pageIndex.value.toString())
+//                    viewModel.pageIndex.value=viewModel.pageIndex.value!!.minus(1)
+//                    Log.e("after",viewModel.pageIndex.value.toString())
+//                    viewModel.setSelectDay(dateVO, week)
+//                    viewModel.setBottomList(dateVO)
+////                    viewModel.setDate()
+//                }
+//                MonthType.NOW -> {
+//                    viewModel.setSelectDay(dateVO, week)
+//                    viewModel.setBottomList(dateVO)
+//                }
+//                MonthType.NEXT -> {
+//                    Log.e("before",viewModel.pageIndex.value.toString())
+//                    viewModel.pageIndex.value= viewModel.pageIndex.value!!.plus(1)
+//                    Log.e("after",viewModel.pageIndex.value.toString())
+//                    viewModel.setSelectDay(dateVO, week)
+//                    viewModel.setBottomList(dateVO)
+////                    viewModel.setDate()
+//                }
+//            }
 
         }
 

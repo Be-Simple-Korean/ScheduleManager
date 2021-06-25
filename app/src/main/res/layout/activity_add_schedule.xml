@@ -70,8 +70,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="20dp"
-                    android:hint="제목 추가">
-                </EditText>
+                    android:hint="제목 추가"></EditText>
             </LinearLayout>
 
             <LinearLayout

@@ -12,7 +12,7 @@ import androidx.lifecycle.ViewModel
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import com.example.schedulemanager.RequestTask
+import com.example.schedulemanager.RequestGoogleCalendar
 import com.example.schedulemanager.adapter.CalendarAdapter
 import com.example.schedulemanager.adapter.PlaceAdapter
 import com.example.schedulemanager.adapter.ScheduleListAdapter
@@ -63,8 +63,9 @@ class MyViewModel : ViewModel() {
     private lateinit var dbHelper: DBHelper
     lateinit var calendarAdapter: CalendarAdapter
     lateinit var curSelectDateVO: DateVO
-
-    var pageIndex=MutableLiveData<Int>()
+    //구글계정인증
+    lateinit var mCredential: GoogleAccountCredential
+//    var pageIndex=MutableLiveData<Int>()
 
     //상단의 타이틀
     var yearMonth = MutableLiveData<String>()
@@ -76,74 +77,11 @@ class MyViewModel : ViewModel() {
     var mainSchduleList = MutableLiveData<ArrayList<ScheduleDataVO>>()
     var subSchduleList = arrayListOf<ScheduleDataVO>()
 
-    /**
-     * 달력 notify 처리
-     */
-    fun setCalendarNotify() {
-        if (::calendarAdapter.isInitialized) {
-            calendarAdapter.notifyDataSetChanged()
-        }
-    }
-
-    /**
-     * MainActivity - 하단 데이터 리스트 세팅
-     */
-    fun setBottomList(dateVO: DateVO) {
-        subSchduleList.clear()
-        val date = getDate(dateVO.year, dateVO.month, dateVO.day)
-        val sql =
-            "select id,title,date,time,place from calendar where date='$date' order by TIME(time) asc"
-        val cursor = DBManager.select(sql, this)
-
-        while (cursor.moveToNext()) {
-            subSchduleList.add(
-                ScheduleDataVO(
-                    id = cursor.getInt(0),
-                    title = cursor.getString(1),
-                    date = cursor.getString(2),
-                    time = cursor.getString(3),
-                    place = cursor.getString(4)
-                )
-            )
-        }
-        mainSchduleList.postValue(subSchduleList)
-    }
-
-    /**
-     * 하단 리스트 데이터 notify
-     */
-    fun setBottomListNotify() {
-        if (::curSelectDateVO.isInitialized) {
-            setBottomList(curSelectDateVO)
-        }
-    }
-
-    /**
-     * DB 초기화
-     */
-    fun setDBHelper(context: Context) {
-        dbHelper = DBHelper(context, "calendar.db")
-    }
-
-    /**
-     * 상단의 년.월 설정
-     */
-    fun setDate() {
-        var page = pageIndex.value!!
-        page -= (Int.MAX_VALUE / 2)
-        val date = Calendar.getInstance().run {
-            add(Calendar.MONTH, page)
-            time
-        }
-        setCurrentDate(date)
-        val datetime = SimpleDateFormat("yyyy년 M월", Locale.KOREA).format(date.time)
-        yearMonth.value = datetime
-    }
 
     /**
      * 달력의 날짜 설정
      */
-    fun setCurrentDate(date: Date) {
+    private fun setCurrentDate(date: Date) {
         val dayList = arrayListOf<DateVO>()
         val calendar = Calendar.getInstance()
         calendar.time = date
@@ -198,6 +136,70 @@ class MyViewModel : ViewModel() {
     }
 
     /**
+     * 달력 notify 처리
+     */
+    fun setCalendarNotify() {
+        if (::calendarAdapter.isInitialized) {
+            calendarAdapter.notifyDataSetChanged()
+        }
+    }
+
+    /**
+     * MainActivity - 하단 데이터 리스트 세팅
+     */
+    fun setBottomList(dateVO: DateVO) {
+        subSchduleList.clear()
+        val date = getDate(dateVO.year, dateVO.month, dateVO.day)
+        val sql =
+            "select id,title,date,time,place from calendar where date='$date' order by TIME(time) asc"
+        val cursor = DBManager.select(sql, this)
+
+        while (cursor.moveToNext()) {
+            subSchduleList.add(
+                ScheduleDataVO(
+                    id = cursor.getInt(0),
+                    title = cursor.getString(1),
+                    date = cursor.getString(2),
+                    time = cursor.getString(3),
+                    place = cursor.getString(4)
+                )
+            )
+        }
+        mainSchduleList.postValue(subSchduleList)
+    }
+
+    /**
+     * 하단 리스트 데이터 notify
+     */
+    fun setBottomListNotify() {
+        if (::curSelectDateVO.isInitialized) {
+            setBottomList(curSelectDateVO)
+        }
+    }
+
+    /**
+     * DB 초기화
+     */
+    fun setDBHelper(context: Context) {
+        dbHelper = DBHelper(context, "calendar.db")
+    }
+
+    /**
+     * 상단의 년.월 설정
+     */
+    fun setDate(pageIndex: Int) {
+        var page = pageIndex
+        page -= (Int.MAX_VALUE / 2)
+        val date = Calendar.getInstance().run {
+            add(Calendar.MONTH, page)
+            time
+        }
+        setCurrentDate(date)
+        val datetime = SimpleDateFormat("yyyy년 M월", Locale.KOREA).format(date.time)
+        yearMonth.value = datetime
+    }
+
+    /**
      * 하단의 날짜 설정
      */
     fun setSelectDay(dateVO: DateVO, week: String) {
@@ -230,6 +232,25 @@ class MyViewModel : ViewModel() {
     }
 
     /**
+     * 날짜 변환 = 2021 9 21  -> 2021-09-21
+     */
+    private fun getDate(year: String, month: String, day: String): String {
+        var m = ""
+        var d = ""
+        if (month.length == 1) {
+            m = "0$month"
+        } else {
+            m = month
+        }
+        if (day.length == 1) {
+            d = "0$day"
+        } else {
+            d = day
+        }
+        return "$year-$m-$d"
+    }
+
+    /**
      * Database 객체 반환
      */
     fun getDatabase(type: DataBaseType): SQLiteDatabase {
@@ -244,10 +265,10 @@ class MyViewModel : ViewModel() {
      * 17,30 -> 오후 5:30
      */
     fun getFilterSelectTime(hour: Int, min: Int): String {
-        var strTime = ""
-        var h = ""
-        var m = ""
-        if(hour > 12) {
+        var strTime:String
+        var h:String
+        val m:String
+        if (hour > 12) {
             h = (hour - 12).toString()
             if (h.length == 1) {
                 h = "0$h"
@@ -261,7 +282,7 @@ class MyViewModel : ViewModel() {
             }
             strTime = "오전 $hour"
         }
-        if(min.toString().length == 1) {
+        if (min.toString().length == 1) {
             m = "0$min"
         } else {
             m = min.toString()
@@ -363,7 +384,7 @@ class MyViewModel : ViewModel() {
             (selectCal.get(Calendar.MONTH) + 1).toString(),
             selectCal.get(Calendar.DATE).toString()
         )
-        var sql =
+        val sql =
             "insert into calendar(title,date,time,place,placeX,placeY,contents,alarmTime) values('" +
                     title + "','" +
                     date + "','" +
@@ -380,7 +401,7 @@ class MyViewModel : ViewModel() {
         if (alarmTime.trim().isNotEmpty()) {
             if (alarmTime != "0" && alarmTime != "") {
                 selectCal.set(
-                 Calendar.MINUTE,
+                    Calendar.MINUTE,
                     selectCal.get(Calendar.MINUTE) - alarmTime.toInt()
                 )
             }
@@ -402,24 +423,6 @@ class MyViewModel : ViewModel() {
         }
     }
 
-    /**
-     * 날짜 변환 = 2021 9 21  -> 2021-09-21
-     */
-    fun getDate(year: String, month: String, day: String): String {
-        var m = ""
-        var d = ""
-        if (month.length == 1) {
-            m = "0$month"
-        } else {
-            m = month
-        }
-        if (day.length == 1) {
-            d = "0$day"
-        } else {
-            d = day
-        }
-        return "$year-$m-$d"
-    }
 
 
     /**
@@ -454,7 +457,7 @@ class MyViewModel : ViewModel() {
         if (alarmTime.trim().isNotEmpty()) {
             if (alarmTime != "0" && alarmTime != "") {
                 selectCal.set(
-                   Calendar.MINUTE,
+                    Calendar.MINUTE,
                     selectCal.get(Calendar.MINUTE) - alarmTime.toInt()
                 )
             }
@@ -517,9 +520,9 @@ class MyViewModel : ViewModel() {
         var alarmCode = ""
         while (cursor.moveToNext()) {
             val date = cursor.getString(0)
-            val year = date.split(".")[0].substring(2, 4)
-            val month = date.split(".")[1]
-            val day = date.split(".")[2]
+            val year = date.split("-")[0].substring(2, 4)
+            val month = date.split("-")[1]
+            val day = date.split("-")[2]
 
             val time = cursor.getString(1)
             val hour = time.split(":")[0]
@@ -569,6 +572,7 @@ class MyViewModel : ViewModel() {
             }
             scheduleList.add(scheduleDataVO)
         }
+        cursor.close()
         scheduleListAdapter.scheduleList = scheduleList
         scheduleListAdapter.notifyDataSetChanged()
     }
@@ -598,7 +602,7 @@ class MyViewModel : ViewModel() {
     fun updateServiceGuide(context: Context): Int {
         val apiAvailability = GoogleApiAvailability.getInstance()
         val sCode = apiAvailability.isGooglePlayServicesAvailable(context)
-        return if(apiAvailability.isUserResolvableError(sCode)) {
+        return if (apiAvailability.isUserResolvableError(sCode)) {
             sCode
         } else {
             0
@@ -608,8 +612,8 @@ class MyViewModel : ViewModel() {
     /**
      * 데이터 요청 클래스 EXCUTE
      */
-    fun requestCalendarData(mCredential: GoogleAccountCredential) {
-        RequestTask(mCredential, this).execute()
+    fun requestCalendarData(context: Context) {
+        RequestGoogleCalendar(context, this).execute()
     }
 
 }

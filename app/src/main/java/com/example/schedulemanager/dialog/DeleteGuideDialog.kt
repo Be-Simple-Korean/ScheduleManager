@@ -42,6 +42,7 @@ class DeleteGuideDialog(context: Context, val id: Int, val viewModel: MyViewMode
             viewModel.cancelAlarm(context, id)
             val sql = "delete from calendar where id =$id"
             DBManager.delete(sql, viewModel)
+            dismiss()
             onDismissListener.onDismissListener(this)
         }
 

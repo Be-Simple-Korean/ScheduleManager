@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper
 /**
  * SQLite 테이블 생성, 버전 업그레이드 처리
  */
-class DBHelper(context: Context, dbName:String):SQLiteOpenHelper(context,dbName,null,4){
+class DBHelper(context: Context, dbName:String):SQLiteOpenHelper(context,dbName,null,6){
     override fun onCreate(db: SQLiteDatabase?) {
         db?.execSQL("create table calendar(" +
                 "id integer primary key AUTOINCREMENT,"+

@@ -10,6 +10,7 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.schedulemanager.MonthType
 import com.example.schedulemanager.adapter.PlaceAdapter
 import com.example.schedulemanager.data.DateVO
 import com.example.schedulemanager.data.location.DocumentsVO
@@ -70,8 +71,11 @@ class SearchPlaceDialog(context: Context,val viewModel: MyViewModel) : Dialog(co
 
     var onClickListener = object : OnClickListener {
 
-        override fun onCalendarItemClickListener(dateVO: DateVO, week: String) {
-
+        override fun onCalendarItemClickListener(
+            dateVO: DateVO,
+            week: String,
+            monthType: MonthType
+        ) {
         }
 
         override fun onClickListener(v: View, documentsVO: DocumentsVO) {

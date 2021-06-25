@@ -37,7 +37,8 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
     /**
      * 달력 아이템 클래스
      */
-    inner class CalendarItemViewHolder(val binding: ItemCalendarBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class CalendarItemViewHolder(val binding: ItemCalendarBinding) :
+        RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -50,9 +51,11 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
     override fun getItemCount(): Int = FULL_COUNT
 
     override fun onBindViewHolder(holder: CalendarAdapter.CalendarItemViewHolder, position: Int) {
-
+        Log.e("수행", "!")
         holder.binding.tvCalendarDate.text = dayList[position].day
-
+        holder.binding.ll.isSelected = false
+        holder.binding.tvCalendarDate.setTextColor(Color.BLACK)
+        holder.binding.tvCalendarDate.typeface = Typeface.DEFAULT
         //주말표시
         when (position % WEEKS) {
             SUNDAY -> holder.binding.tvCalendarDate.setTextColor(Color.RED)
@@ -68,6 +71,7 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
             holder.binding.tvCalendarDate.alpha = 1f
             holder.binding.ivCalendarSchedule.alpha = 1f
         }
+
 
         //셀렉터
         if (dayList[position].isSelect) {
@@ -85,15 +89,15 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
         }
 
         //클릭 이벤트
-        holder.itemView.setOnClickListener{
-            val monthType :MonthType
-            val selectMonth=dayList[position].month.toInt()
-            if(curShowMonth>selectMonth){
-                monthType=MonthType.PREVIOUS
-            }else if(curShowMonth==selectMonth){
-                monthType=MonthType.NOW
-            }else{
-                monthType=MonthType.NEXT
+        holder.itemView.setOnClickListener {
+            val monthType: MonthType
+            val selectMonth = dayList[position].month.toInt()
+            if (curShowMonth > selectMonth) {
+                monthType = MonthType.PREVIOUS
+            } else if (curShowMonth == selectMonth) {
+                monthType = MonthType.NOW
+            } else {
+                monthType = MonthType.NEXT
             }
 
             for (i in 0 until dayList.size) {

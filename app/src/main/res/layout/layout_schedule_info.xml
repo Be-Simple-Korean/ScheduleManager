@@ -150,7 +150,5 @@
                 android:textSize="30dp"
                 tools:text="위치" />
         </LinearLayout>
-
-
     </LinearLayout>
 </FrameLayout>

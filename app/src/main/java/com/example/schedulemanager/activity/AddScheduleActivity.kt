@@ -303,7 +303,6 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
                 binding.llMap.visibility = View.VISIBLE
                 val mapFragment =
                     supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-
                 selectDoucments = documentsVO
                 mapFragment.getMapAsync(this@AddScheduleActivity)
             }
