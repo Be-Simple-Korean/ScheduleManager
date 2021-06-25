@@ -19,7 +19,7 @@ import com.example.schedulemanager.databinding.ActivityAddScheduleBinding
 import com.example.schedulemanager.dialog.DeleteGuideDialog
 import com.example.schedulemanager.dialog.SearchPlaceDialog
 import com.example.schedulemanager.dialog.SetAlarmDialog
-import com.example.schedulemanager.lisetener.OnAlarmDialogCheckListener
+import com.example.schedulemanager.lisetener.OnAlarmDialogCheckedListener
 import com.example.schedulemanager.lisetener.OnDeleteDialogCheckListener
 import com.example.schedulemanager.lisetener.OnPlaceDialogItemSelectedListener
 import com.example.schedulemanager.viewmodel.MyViewModel
@@ -305,8 +305,8 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
-    var onAlarmDialogCheckListener = object : OnAlarmDialogCheckListener {
-        override fun onAlarmDialogCheckListener(time: String) {
+    var onAlarmDialogCheckListener = object : OnAlarmDialogCheckedListener {
+        override fun onAlarmDialogCheckedListener(time: String) {
             if (time == NO_INPUT_TIME) {
                 binding.tvScheduleSelectedAlarmTime.text = "일정 시작 시간"
             } else {

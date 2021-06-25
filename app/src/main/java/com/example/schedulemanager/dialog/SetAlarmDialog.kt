@@ -8,14 +8,14 @@ import android.os.Bundle
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import com.example.schedulemanager.databinding.DialogInputAlarmTimeBinding
-import com.example.schedulemanager.lisetener.OnAlarmDialogCheckListener
+import com.example.schedulemanager.lisetener.OnAlarmDialogCheckedListener
 
 /**
  * 알람 설정 다이얼로그
  */
 class SetAlarmDialog(context: Context, private val data: String) : Dialog(context) {
 
-    lateinit var onAlarmDialogCheckListener: OnAlarmDialogCheckListener
+    lateinit var onAlarmDialogCheckListener: OnAlarmDialogCheckedListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +56,7 @@ class SetAlarmDialog(context: Context, private val data: String) : Dialog(contex
             } else {
                 val time = binding.etSetAlarmTime.text.toString().toInt().toString()
                 dismiss()
-                onAlarmDialogCheckListener.onAlarmDialogCheckListener(time)
+                onAlarmDialogCheckListener.onAlarmDialogCheckedListener(time)
             }
         }
     }
