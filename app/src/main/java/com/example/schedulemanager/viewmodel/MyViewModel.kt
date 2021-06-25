@@ -165,6 +165,7 @@ class MyViewModel : ViewModel() {
                 )
             )
         }
+        cursor.close()
         mainSchduleList.postValue(subSchduleList)
     }
 
@@ -516,20 +517,20 @@ class MyViewModel : ViewModel() {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val sql = "select date,time from calendar where id = $id"
         val cursor = DBManager.select(sql, this)
-
         var alarmCode = ""
-        while (cursor.moveToNext()) {
-            val date = cursor.getString(0)
-            val year = date.split("-")[0].substring(2, 4)
-            val month = date.split("-")[1]
-            val day = date.split("-")[2]
-
-            val time = cursor.getString(1)
-            val hour = time.split(":")[0]
-            val min = time.split(":")[1]
-            alarmCode = year + month + day + hour + min
+        if(cursor.getString(1)!="종일"){
+            while (cursor.moveToNext()) {
+                val date = cursor.getString(0)
+                val year = date.split("-")[0].substring(2, 4)
+                val month = date.split("-")[1]
+                val day = date.split("-")[2]
+                val time = cursor.getString(1)
+                val hour = time.split(":")[0]
+                val min = time.split(":")[1]
+                alarmCode = year + month + day + hour + min
+            }
         }
-
+        cursor.close()
         if (alarmCode != "") {
             val intent = Intent(context, MyBroadCastReceiver::class.java)
             val pendingIntent = PendingIntent.getBroadcast(context, alarmCode.toInt(), intent, 0)

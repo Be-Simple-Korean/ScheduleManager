@@ -1,12 +1,11 @@
 package com.example.schedulemanager.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schedulemanager.data.location.DocumentsVO
 import com.example.schedulemanager.databinding.ItemSearchPlaceBinding
-import com.example.schedulemanager.lisetener.OnClickListener
+import com.example.schedulemanager.lisetener.OnSearchPlaceDialogItemClickListener
 
 /**
  * 위치 목록 RecyclerView Adapter
@@ -17,7 +16,7 @@ class PlaceAdapter : RecyclerView.Adapter<PlaceAdapter.LocationItemViewHolder>()
         const val NO_DATA = 0
     }
 
-    lateinit var onClickListener: OnClickListener
+    lateinit var onSearchPlaceDialogItemClickListener: OnSearchPlaceDialogItemClickListener
     var documentList = arrayListOf<DocumentsVO>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LocationItemViewHolder {
@@ -34,13 +33,17 @@ class PlaceAdapter : RecyclerView.Adapter<PlaceAdapter.LocationItemViewHolder>()
         holder.binding.tvSearchPlaceName.text = documentList[position].place_name
         holder.binding.tvSearchPlaceAddr.text = documentList[position].address_name
 
-        holder.itemView.setOnClickListener{
-            onClickListener.onClickListener(it, documentList[position])
+        holder.itemView.setOnClickListener {
+            onSearchPlaceDialogItemClickListener.onPlaceDialogItemClickListener(
+                it,
+                documentList[position]
+            )
         }
     }
 
     /**
      * 위치아이템 뷰홀더
      */
-    inner class LocationItemViewHolder(val binding: ItemSearchPlaceBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class LocationItemViewHolder(val binding: ItemSearchPlaceBinding) :
+        RecyclerView.ViewHolder(binding.root)
 }

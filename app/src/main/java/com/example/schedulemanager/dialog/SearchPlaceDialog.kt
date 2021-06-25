@@ -10,27 +10,25 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.schedulemanager.MonthType
 import com.example.schedulemanager.adapter.PlaceAdapter
-import com.example.schedulemanager.data.DateVO
 import com.example.schedulemanager.data.location.DocumentsVO
 import com.example.schedulemanager.databinding.DialogSearchPlaceBinding
-import com.example.schedulemanager.lisetener.OnClickListener
-import com.example.schedulemanager.lisetener.OnDismissListener
+import com.example.schedulemanager.lisetener.OnPlaceDialogItemSelectedListener
+import com.example.schedulemanager.lisetener.OnSearchPlaceDialogItemClickListener
 import com.example.schedulemanager.viewmodel.MyViewModel
 
 /**
  * 위치 검색 다이얼로그
  */
-class SearchPlaceDialog(context: Context,val viewModel: MyViewModel) : Dialog(context) {
+class SearchPlaceDialog(context: Context, val viewModel: MyViewModel) : Dialog(context) {
 
     companion object {
         const val NO_RESULT = 0
-
     }
 
     lateinit var binding: DialogSearchPlaceBinding
-    lateinit var onDimissListener: OnDismissListener
+    lateinit var onPlaceDialogItemSelectedListener: OnPlaceDialogItemSelectedListener
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DialogSearchPlaceBinding.inflate(layoutInflater)
@@ -43,11 +41,11 @@ class SearchPlaceDialog(context: Context,val viewModel: MyViewModel) : Dialog(co
             it.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
 
-        val placeAdater= PlaceAdapter()
-        placeAdater.onClickListener=onClickListener
+        val placeAdater = PlaceAdapter()
+        placeAdater.onSearchPlaceDialogItemClickListener = onSearchPlaceDialogItemClickListener
         val layoutManager = LinearLayoutManager(context)
         binding.rvSearchPlace.layoutManager = layoutManager
-        binding.rvSearchPlace.adapter=placeAdater
+        binding.rvSearchPlace.adapter = placeAdater
         val inputMethodManager =
             context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
@@ -61,25 +59,18 @@ class SearchPlaceDialog(context: Context,val viewModel: MyViewModel) : Dialog(co
             val query = binding.etSearchPlaceKeyword.text.toString()
             if (query.trim().length == NO_RESULT) {
                 Toast.makeText(context, "장소를 입력해주세요.", Toast.LENGTH_SHORT).show()
-            }else{
-                viewModel.requestPlaceData(context,query,placeAdater)
+            } else {
+                viewModel.requestPlaceData(context, query, placeAdater)
             }
             true
         }
 
     }
 
-    var onClickListener = object : OnClickListener {
-
-        override fun onCalendarItemClickListener(
-            dateVO: DateVO,
-            week: String,
-            monthType: MonthType
-        ) {
-        }
-
-        override fun onClickListener(v: View, documentsVO: DocumentsVO) {
-            onDimissListener.onDismissListener(this@SearchPlaceDialog, documentsVO)
+    var onSearchPlaceDialogItemClickListener = object : OnSearchPlaceDialogItemClickListener {
+        override fun onPlaceDialogItemClickListener(v: View, documentsVO: DocumentsVO) {
+            dismiss()
+            onPlaceDialogItemSelectedListener.onPlaceDialogItemSelectedListener(documentsVO)
         }
     }
 }

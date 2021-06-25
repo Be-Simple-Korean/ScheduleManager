@@ -14,7 +14,7 @@ import com.example.schedulemanager.viewmodel.MyViewModel
 import com.example.schedulemanager.data.DateVO
 import com.example.schedulemanager.database.DBManager
 import com.example.schedulemanager.databinding.ItemCalendarBinding
-import com.example.schedulemanager.lisetener.OnClickListener
+import com.example.schedulemanager.lisetener.OnCalendarItmeClickListener
 import java.util.*
 
 /**
@@ -29,7 +29,7 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
         const val SATURDAY = 6
     }
 
-    lateinit var onClickListener: OnClickListener
+    lateinit var onCalendarItmeClickListener: OnCalendarItmeClickListener
     lateinit var viewModel: MyViewModel
     var dayList = arrayListOf<DateVO>()
     var curShowMonth = 0
@@ -51,7 +51,6 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
     override fun getItemCount(): Int = FULL_COUNT
 
     override fun onBindViewHolder(holder: CalendarAdapter.CalendarItemViewHolder, position: Int) {
-        Log.e("수행", "!")
         holder.binding.tvCalendarDate.text = dayList[position].day
         holder.binding.ll.isSelected = false
         holder.binding.tvCalendarDate.setTextColor(Color.BLACK)
@@ -118,7 +117,7 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
 //                }
 //            }
             viewModel.curSelectDateVO = dayList[position]
-            onClickListener.onCalendarItemClickListener(
+            onCalendarItmeClickListener.onCalendarItemClickListener(
                 dayList[position],
                 when (position % WEEKS) {
                     0 -> "일"
@@ -149,6 +148,7 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarItemViewHol
             } else {
                 holder.binding.ivCalendarSchedule.visibility = View.INVISIBLE
             }
+            cursor.close()
         }
     }
 

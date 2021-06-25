@@ -1,14 +1,19 @@
 package com.example.schedulemanager.adapter
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schedulemanager.activity.AddScheduleActivity
 import com.example.schedulemanager.data.ScheduleDataVO
 import com.example.schedulemanager.databinding.ItemScheduleBinding
 
-class ScheduleListAdapter : RecyclerView.Adapter<ScheduleListAdapter.ItemViewHolder>() {
+class ScheduleListAdapter(val requestActivityResultLauncher: ActivityResultLauncher<Intent>) : RecyclerView.Adapter<ScheduleListAdapter.ItemViewHolder>() {
 
     companion object {
         const val DATELIST = 1
@@ -49,9 +54,8 @@ class ScheduleListAdapter : RecyclerView.Adapter<ScheduleListAdapter.ItemViewHol
         holder.itemView.setOnClickListener {
             val intent = Intent(it.context, AddScheduleActivity::class.java)
             intent.putExtra("isUpdate", true)
-            intent.putExtra("date", scheduleList[position].date)
             intent.putExtra("id", scheduleList[position].id)
-            it.context.startActivity(intent)
+            requestActivityResultLauncher.launch(intent)
         }
     }
 

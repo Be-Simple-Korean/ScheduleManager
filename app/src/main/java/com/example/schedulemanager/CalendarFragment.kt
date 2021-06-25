@@ -1,7 +1,6 @@
 package com.example.schedulemanager
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,9 +8,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import com.example.schedulemanager.adapter.CalendarAdapter
 import com.example.schedulemanager.data.DateVO
-import com.example.schedulemanager.data.location.DocumentsVO
 import com.example.schedulemanager.databinding.FragmentCalendarBinding
-import com.example.schedulemanager.lisetener.OnClickListener
+import com.example.schedulemanager.lisetener.OnCalendarItmeClickListener
 import com.example.schedulemanager.viewmodel.MyViewModel
 
 enum class MonthType {
@@ -44,7 +42,7 @@ class CalendarFragment : Fragment() {
             )
         )
         val calendarAdapter = CalendarAdapter()
-        calendarAdapter.onClickListener = onClickListener
+        calendarAdapter.onCalendarItmeClickListener = onCalendarItmeClickListener
         calendarAdapter.viewModel = viewModel
         binding.rvCalendar.adapter = calendarAdapter
         viewModel.calendarAdapter = calendarAdapter
@@ -54,7 +52,7 @@ class CalendarFragment : Fragment() {
         return binding.root
     }
 
-    val onClickListener = object : OnClickListener {
+    val onCalendarItmeClickListener = object : OnCalendarItmeClickListener {
         override fun onCalendarItemClickListener(
             dateVO: DateVO,
             week: String,
@@ -87,12 +85,6 @@ class CalendarFragment : Fragment() {
 //            }
 
         }
-
-        override fun onClickListener(v: View, documentsVO: DocumentsVO) {
-
-        }
-
-
     }
 
 }

@@ -12,6 +12,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
@@ -32,12 +34,20 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val REQUEST_CODE = 1000
         const val REQUEST_GOOGLE_PLAY_SERVICES = 1002
-        const val REQUEST_ACCOUNT_PICKER = 1003
     }
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MyViewModel
-    private val scheduleListAdapter = ScheduleListAdapter()
+    var requestActivty: ActivityResultLauncher<Intent> = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) { it ->
+        if (it.resultCode == Activity.RESULT_OK) {
+            viewModel.setCalendarNotify()
+            viewModel.setBottomListNotify()
+        }
+    }
+    private val scheduleListAdapter = ScheduleListAdapter(requestActivty)
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,13 +97,14 @@ class MainActivity : AppCompatActivity() {
                 this,
                 AddScheduleActivity::class.java
             )
-            startActivity(intent)
+            requestActivty.launch(intent)
+//            startActivity(intent)
         })
 
         //리스트 클릭버튼
         binding.ibMainAllList.setOnClickListener {
             val intent = Intent(this, ScheduleListActivity::class.java)
-            startActivity(intent)
+            requestActivty.launch(intent)
         }
 
         //동기화 이미지버튼 클릭
@@ -140,11 +151,8 @@ class MainActivity : AppCompatActivity() {
 //        }
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.setCalendarNotify()
-        viewModel.setBottomListNotify()
-    }
+
+
 
     /**
      * 알림채널 생성
@@ -175,10 +183,7 @@ class MainActivity : AppCompatActivity() {
             }
         } else if (viewModel.mCredential.selectedAccountName == null) {
             // 사용자가 구글 계정을 선택할 수 있는 다이얼로그를 보여준다.
-            startActivityForResult(
-                viewModel.mCredential.newChooseAccountIntent(),
-                REQUEST_ACCOUNT_PICKER
-            )
+            requestAccountActivity.launch(viewModel.mCredential.newChooseAccountIntent())
         } else {
             viewModel.requestCalendarData(this)
         }
@@ -209,21 +214,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            REQUEST_ACCOUNT_PICKER ->
-                if (resultCode == Activity.RESULT_OK && data != null && data.extras != null) {
-                    viewModel.mCredential.selectedAccountName =
-                        data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
-                    getGoogleConditionResult()
-                }
-            else ->
-                if (resultCode == Activity.RESULT_OK) {
-                    getGoogleConditionResult()
-                }
+    val requestAccountActivity:ActivityResultLauncher<Intent> =registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()){
+        if (it.resultCode == Activity.RESULT_OK && it.data != null && it.data?.extras != null) {
+            viewModel.mCredential.selectedAccountName =
+                it.data?.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
+            getGoogleConditionResult()
         }
-
     }
+
 
 }

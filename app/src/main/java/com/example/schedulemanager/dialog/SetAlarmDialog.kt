@@ -5,19 +5,17 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import com.example.schedulemanager.databinding.DialogInputAlarmTimeBinding
-import com.example.schedulemanager.lisetener.OnDismissListener
+import com.example.schedulemanager.lisetener.OnAlarmDialogCheckListener
 
 /**
  * 알람 설정 다이얼로그
  */
 class SetAlarmDialog(context: Context, private val data: String) : Dialog(context) {
 
-    lateinit var onDismissListener: OnDismissListener
+    lateinit var onAlarmDialogCheckListener: OnAlarmDialogCheckListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,13 +49,14 @@ class SetAlarmDialog(context: Context, private val data: String) : Dialog(contex
         binding.llDialogAlarm.setOnClickListener {}
 
         //완료 텍스트 클릭이벤트
-        binding.tvAlarmSet.setOnClickListener{
+        binding.tvAlarmSet.setOnClickListener {
             imm.hideSoftInputFromWindow(binding.etSetAlarmTime.windowToken, 0)
             if (binding.etSetAlarmTime.text.trim().isEmpty()) {
                 dismiss()
             } else {
                 val time = binding.etSetAlarmTime.text.toString().toInt().toString()
-                onDismissListener.onDismissFromAlarm(this, time)
+                dismiss()
+                onAlarmDialogCheckListener.onAlarmDialogCheckListener(time)
             }
         }
     }

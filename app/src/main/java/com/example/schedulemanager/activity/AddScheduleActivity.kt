@@ -1,5 +1,6 @@
 package com.example.schedulemanager.activity
 
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
@@ -18,7 +19,9 @@ import com.example.schedulemanager.databinding.ActivityAddScheduleBinding
 import com.example.schedulemanager.dialog.DeleteGuideDialog
 import com.example.schedulemanager.dialog.SearchPlaceDialog
 import com.example.schedulemanager.dialog.SetAlarmDialog
-import com.example.schedulemanager.lisetener.OnDismissListener
+import com.example.schedulemanager.lisetener.OnAlarmDialogCheckListener
+import com.example.schedulemanager.lisetener.OnDeleteDialogCheckListener
+import com.example.schedulemanager.lisetener.OnPlaceDialogItemSelectedListener
 import com.example.schedulemanager.viewmodel.MyViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -71,6 +74,7 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
             if (cursor.count > 0) {
                 oldId = id
             }
+            cursor.close()
             if (oldId != -1) {
                 val sql = "select * from calendar where id=$oldId"
                 val cursor = DBManager.select(sql, viewModel)
@@ -108,7 +112,7 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
                     if (cursor.getString(5).trim().isNotEmpty()) {
                         binding.llMap.visibility = View.VISIBLE
                         val mapFragment =
-                            supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+                            supportFragmentManager.findFragmentById(R.id.fragment_map) as SupportMapFragment
 
                         selectDoucments = DocumentsVO(
                             place_name = cursor.getString(4),
@@ -146,6 +150,7 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
                         binding.etScheduleAddContents.setTextColor(Color.BLACK)
                     }
                 }
+                cursor.close()
             }
         } else {
             //키보드 나타내기
@@ -187,7 +192,7 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
         // 위치 선택 버튼 클릭이벤트
         binding.btnSelectPlace.setOnClickListener {
             val searchPlaceDialog = SearchPlaceDialog(this, viewModel)
-            searchPlaceDialog.onDimissListener = onDimissListener
+            searchPlaceDialog.onPlaceDialogItemSelectedListener =onPlaceDialogItemSelectedListener
             searchPlaceDialog.show()
         }
 
@@ -197,7 +202,7 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
             time = if (time.contains(TIME_NOW)) NO_INPUT_TIME else time.split(" ")[0]
             val setAlarmDialog =
                 SetAlarmDialog(this, time)
-            setAlarmDialog.onDismissListener = onDimissListener
+            setAlarmDialog.onAlarmDialogCheckListener = onAlarmDialogCheckListener
             setAlarmDialog.show()
         }
 
@@ -237,7 +242,6 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
                     alarmTime,
                     selectCal, oldId
                 )
-                finish()
             } else {
                 viewModel.addSchedule(
                     this,
@@ -251,13 +255,16 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
                     selectCal
                 )
             }
+            setResult(Activity.RESULT_OK)
             finish()
         }
 
         //삭제 이미지 클릭 이벤트
         binding.llDelete.setOnClickListener {
-            val deleteGuideDialog = DeleteGuideDialog(this, oldId, viewModel)
-            deleteGuideDialog.onDismissListener = onDimissListener
+            Log.e("time",binding.tvScheduleSelectedAlarmTime.text.toString())
+            val time= binding.tvScheduleSelectedAlarmTime.text.toString()
+            val deleteGuideDialog = DeleteGuideDialog(this, oldId,time, viewModel)
+            deleteGuideDialog.onDeleteDialogCheckListener = onDeleteDialogChceckListener
             deleteGuideDialog.show()
         }
     }
@@ -282,9 +289,24 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
             binding.tvScheduleSelectedDate.text = "$selectYear.$selectMonth.$selectDay"
         }
 
-    var onDimissListener = object : OnDismissListener {
-        override fun onDismissFromAlarm(dialog: SetAlarmDialog, time: String) {
-            dialog.dismiss()
+    var onPlaceDialogItemSelectedListener = object : OnPlaceDialogItemSelectedListener {
+        override fun onPlaceDialogItemSelectedListener(documentsVO: DocumentsVO) {
+            binding.tvScheduleSelectedPlace.text = documentsVO.place_name
+            if (!documentsVO.address_name.equals(MyViewModel.FIRST_VALUE_ADDRESS)) {
+                binding.llMap.visibility = View.VISIBLE
+                val mapFragment =
+                    supportFragmentManager.findFragmentById(R.id.fragment_map) as SupportMapFragment
+                selectDoucments = documentsVO
+                mapFragment.getMapAsync(this@AddScheduleActivity)
+            }else{
+                binding.llMap.visibility = View.GONE
+            }
+        }
+
+    }
+
+    var onAlarmDialogCheckListener = object : OnAlarmDialogCheckListener {
+        override fun onAlarmDialogCheckListener(time: String) {
             if (time == NO_INPUT_TIME) {
                 binding.tvScheduleSelectedAlarmTime.text = "일정 시작 시간"
             } else {
@@ -292,29 +314,17 @@ class AddScheduleActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             alarmTime = time
         }
-
-        override fun onDismissListener(
-            searchPlaceDialog: SearchPlaceDialog,
-            documentsVO: DocumentsVO
-        ) {
-            searchPlaceDialog.dismiss()
-            binding.tvScheduleSelectedPlace.text = documentsVO.place_name
-            if (!documentsVO.address_name.equals(MyViewModel.FIRST_VALUE_ADDRESS)) {
-                binding.llMap.visibility = View.VISIBLE
-                val mapFragment =
-                    supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-                selectDoucments = documentsVO
-                mapFragment.getMapAsync(this@AddScheduleActivity)
-            }
-        }
-
-        override fun onDismissListener(dialog: DeleteGuideDialog) {
-            dialog.dismiss()
-            finish()
-        }
-
     }
 
+    var onDeleteDialogChceckListener = object : OnDeleteDialogCheckListener {
+        override fun onDeleteDialogCheckListener() {
+            Log.e("수행","1")
+            setResult(Activity.RESULT_OK)
+            finish()
+        }
+    }
+
+    //구글맵 세팅
     override fun onMapReady(googleMap: GoogleMap) {
         val map = googleMap
 

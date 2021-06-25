@@ -27,6 +27,7 @@ object DBManager {
                 id=cursor.getInt(0)
             }
         }
+        cursor.close()
        return id
     }
 
